@@ -10,3 +10,5 @@ __pycache__/
 
 server/venv
 .env
+
+my_database.db
