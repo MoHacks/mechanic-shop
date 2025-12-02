@@ -3,7 +3,7 @@ Modular Frontend Architecture + Separation of Concerns + Reusable Component Patt
 inventory/
 │
 ├── api/                 # Shared API logic for CRUD operations
-│   ├── index.js         # Generic API client / helpers
+│   ├── index.js         # Generic API client / helpers ??? (I don't think its necessary)
 │   ├── tiresApi.js      # Tire-specific API calls
 │   ├── rimsApi.js       # Rim-specific API calls
 │   ├── lightbulbsApi.js # Lightbulb-specific specific API calls
