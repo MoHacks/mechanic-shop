@@ -1,5 +1,5 @@
 Modular Frontend Architecture + Separation of Concerns + Reusable Component Pattern
-
+```
 inventory/
 │
 ├── api/                 # Shared API logic for CRUD operations
@@ -66,3 +66,4 @@ inventory/
 │
 └── App.jsx            # Main app router and layout
 
+```
