@@ -7,7 +7,7 @@ from models import Threshold
 from schemas import Threshold as ThresholdSchema, ThresholdUpdate
 from websocket_manager import manager
 
-router = APIRouter(prefix="/threshold", tags=["Threshold"])
+router = APIRouter(prefix="/tires/threshold", tags=["Threshold"])
 
 @router.get("/", response_model=ThresholdSchema)
 async def get_threshold(db : Session = Depends(get_db)):

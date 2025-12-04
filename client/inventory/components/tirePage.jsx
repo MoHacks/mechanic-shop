@@ -13,115 +13,107 @@ import {
   ReferenceLine
 } from "recharts";
 import axios from "axios";
+
+
+import { getTires, getTireThreshold, changeTireThreshold, createTire, deleteTire} from "../api/tiresApi";
+import TireEditModal from "../modals/tiresEditModal";
 // import {jsPDF} from "jspdf";
 // import autoTable from "jspdf-autotable";
-import ThresholdControl from "./threshold"; // use this import for seperation of concerns!
 
 
 // Modal Component (for updating, i.e. add/remove tires)
-function EditTireModal({tireList, onClose, onSave}) {
-  const [selectedTireName, setSelectedTireName] = useState("");
-  const [usedTireQty, setUsedTireQty] = useState(0);
-  const [newTireQty, setNewTireQty] = useState(0);
-  // const [loading, setLoading] = useState(false);
+// function TireEditModal({tireList, onClose, onSave}) {
+//   const [selectedTireName, setSelectedTireName] = useState("");
+//   const [usedTireQty, setUsedTireQty] = useState(0);
+//   const [newTireQty, setNewTireQty] = useState(0);
 
-  // Whenever the selection changes, update the quantities from the tireList
-  useEffect(() => {
+//   // Whenever the selection changes, update the quantities from the tireList
+//   useEffect(() => {
 
-    console.log("tireList triggered!: ", tireList)
-    if (!selectedTireName){
-      // Reset to empty if no tire selected
-      setNewTireQty("");
-      setUsedTireQty("");
-      return;
-    }
+//     console.log("tireList triggered!: ", tireList)
+//     if (!selectedTireName){
+//       // Reset to empty if no tire selected
+//       setNewTireQty("");
+//       setUsedTireQty("");
+//       return;
+//     }
 
-    const found = tireList.find(t => t.name === selectedTireName);
-    if(found){
-      // populate with the tire's curent values
-      setNewTireQty(found.new ?? 0);
-      setUsedTireQty(found.used ?? 0);
-    } else{
-      //fallback if not found
-      setNewTireQty("");
-      setUsedTireQty("");
-    }
+//     const found = tireList.find(t => t.name === selectedTireName);
+//     if(found){
+//       // populate with the tire's curent values
+//       setNewTireQty(found.new ?? 0);
+//       setUsedTireQty(found.used ?? 0);
+//     } else{
+//       //fallback if not found
+//       setNewTireQty("");
+//       setUsedTireQty("");
+//     }
 
-  }, [selectedTireName, tireList]);
+//   }, [selectedTireName, tireList]);
 
-  // const handleSave = () => {
-  //   onSave({...tire, name: selectedTireName, used: usedTireQty, new: newTireQty})
-  // }
-  // TODO: call this when ready
-  const handleSave = async () => {
-    console.log("Selected tire to save:", selectedTireName);
+//   const handleSave = async () => {
+//     console.log("Selected tire to save:", selectedTireName);
 
-    if (!selectedTireName) {
-      alert("Please select a tire first.");
-      return;
-    }
+//     if (!selectedTireName) {
+//       alert("Please select a tire first.");
+//       return;
+//     }
 
-    // setLoading(true);
+//     // NOTE: axios treats the 3rd argument as the config object -> it recognizes the 'params' argument
+//     // params: { ... } and converts it to its respected query string format PUT /tires/update?name=xxx&new=10&used=5
+//     updateTires({
+//       params: { 
+//         name: selectedTireName,
+//         new: newTireQty,
+//         used: usedTireQty
+//       }
+//     })
+//     .then(res => {
+//       console.log("Updated data: ", res.data);
+//       // NOTE: passes the updated tire back to the parent (TireBarChart)
+//       onSave({name: selectedTireName, updatedData: res.data});
+//     })
+//     .catch(err => console.error(err));
+//   };
 
-    await axios.put(`http://localhost:8000/tires/update`, null, {
-        params: { 
-          name: selectedTireName,
-          new: newTireQty,
-          used: usedTireQty
-        }
-    })
-    .then(res => {
-      // setNumTires(prev => prev.map(t => t.id === updatedTire.id ? res.data : t));
-      console.log("Updated data: ", res.data);
-      // NOTE: passes the updated tire back to the parent (TireBarChart)
-      onSave({name: selectedTireName, updatedData: res.data});
-      // setEditingNumTires(null);
-    })
-    // .then(
-    //   setLoading(false)
-    // )
-    .catch(err => console.error(err));
-  };
-
-  return (
-      <div className="modal-overlay" style={{
-        position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center"
-      }}>
-      <div className="modal-content" style={{
-          background: "#222", padding: "20px", borderRadius: "10px", width: "150px"
-      }}>
-        <h3>Edit Tire</h3>
-        {/* TIRE NAME DROPDOWN */}
-        <label>Tire Name:</label>
-        <select
-          value={selectedTireName}
-          onChange={(e) => {
-            setSelectedTireName(e.target.value);
-            console.log("Selected tire:", e.target.value); //
-          }}
-          style={{ width: "100%", padding: "8px", marginBottom: "12px" }}
-        > 
-          <option value="">-- Select a Tire --</option> {/* Default empty option */}
-          {tireList.map((t) => (
-            <option key={t.id} value={t.name}>
-              {t.name}
-            </option>
-          ))}
-        </select>
-        {/* <input value={selectedTireName} onChange={(e) => setSelectedTireName(e.target.value)} /> */}
-        <label>New Quantity:</label>
-        <input type="number" value={newTireQty} onChange={(e) => setNewTireQty(Number(e.target.value))} />
-        <label>Used Quantity:</label>
-        <input type="number" value={usedTireQty} onChange={(e) => setUsedTireQty(Number(e.target.value))} />
-        <div style={{ marginTop: "10px", display: "flex", justifyContent: "space-between" }}>
-          <button onClick={handleSave}>Save</button>
-          <button onClick={onClose}>Cancel</button>
-        </div>
-      </div>
-    </div>
-  );
-}
+//   return (
+//       <div className="modal-overlay" style={{
+//         position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 1,
+//         backgroundColor: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center"
+//       }}>
+//       <div className="modal-content" style={{
+//           background: "#222", padding: "20px", borderRadius: "10px", width: "150px"
+//       }}>
+//         <h3>Edit Tire</h3>
+//         {/* TIRE NAME DROPDOWN */}
+//         <label>Tire Name:</label>
+//         <select
+//           value={selectedTireName}
+//           onChange={(e) => {
+//             setSelectedTireName(e.target.value);
+//             console.log("Selected tire:", e.target.value); //
+//           }}
+//           style={{ width: "100%", padding: "8px", marginBottom: "12px" }}
+//         > 
+//           <option value="">-- Select a Tire --</option> {/* Default empty option */}
+//           {tireList.map((t) => (
+//             <option key={t.id} value={t.name}>
+//               {t.name}
+//             </option>
+//           ))}
+//         </select>
+//         <label>New Quantity:</label>
+//         <input type="number" value={newTireQty} onChange={(e) => setNewTireQty(Number(e.target.value))} />
+//         <label>Used Quantity:</label>
+//         <input type="number" value={usedTireQty} onChange={(e) => setUsedTireQty(Number(e.target.value))} />
+//         <div style={{ marginTop: "10px", display: "flex", justifyContent: "space-between" }}>
+//           <button onClick={handleSave}>Save</button>
+//           <button onClick={onClose}>Cancel</button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 
 export default function TireBarChart() {
@@ -137,7 +129,6 @@ export default function TireBarChart() {
   const [data, setData] = useState([]);
 
   // TODO: Likely get rid of this since the `data` variable contains the same information!
-  const[numTiresList, setNumTiresList] = useState([]); 
   const[editingNumTires, setEditingNumTires] = useState(false);
   
    // Delete popup status
@@ -154,27 +145,22 @@ export default function TireBarChart() {
  
    const maxValue = Math.max(...data.flatMap((d) => [d.new, d.used]));
 
-  // Fetch tires on load
+
   const fetchTires = async () => {
-    try {
-      const res = await axios.get("http://localhost:8000/tires/");
-      setData(res.data);
-      setNumTiresList(res.data);
-      // res.data.forEach(entry => {
-      //   console.log(entry.name)
-      // })
-      
-    } catch (err) {
-      console.error("Error fetching tires:", err);
-    }
+    const tireData = await getTires();
+    setData(tireData);
   };
 
   const fetchThreshold = async () => {
 
       // Fetch the current threshold on component mount
-      await axios.get("http://localhost:8000/threshold/")
-        .then(res => setThreshold(res.data.value))
-        .catch(err => console.log("Check out this error: ", err))
+     const thresholdData = await getTireThreshold();
+     try{
+      setThreshold(thresholdData.value)}
+
+     catch (err){
+      err => console.log("Check out this error: ", err)
+     }
   }
 
   
@@ -185,8 +171,6 @@ export default function TireBarChart() {
 
     // Fetch Threshold on load!
     fetchThreshold();
-
-    // getLogs();
 
     // Setup WebSocket connection
     const ws = new WebSocket("ws://localhost:8000/ws");
@@ -217,39 +201,19 @@ export default function TireBarChart() {
     ws.onerror = (err) => console.error("⚠️ WebSocket error:", err);
 
     // Cleanup when component unmounts
-    return () => ws.close();
-
-    
+    return () => ws.close();    
 
   }, []); //runs once
 
 
-
-  /*
-
-  // TODO: NO LONGER NECESSARY SINCE WE ARE FETCHING FROM THE DATABASE USING http://localhost:8000/tires/
-  const [data, setData] = useState([
-    { name: "Tire A", new: 400, used: 240 },
-    { name: "Tire B", new: 300, used: 456 },
-    { name: "Tire C", new: 200, used: 139 },
-    { name: "Tire D", new: 278, used: 390 },
-    { name: "Tire E", new: 678, used: 610 },
-    { name: "Tire F", new: 178, used: 440 },
-    { name: "Tire G", new: 810, used: 200},
-  ]);
-  */
-
- 
-
   // Update backend when threshold changes
   const handleThresholdChange = (e) => {
-    // if (threshold == 0) return;
     const value = Number(e.target.value);
-    setThreshold(value);
-    axios.put(`http://localhost:8000/threshold/`, {value: value })
-    .then(res => console.log("res: ", res.data))
-    .catch(err => console.log("error :", err));
+    
+    // Changes the backend to reflect the updated threshold value change
+    changeTireThreshold(value);
 
+    setThreshold(value);
   };
 
   // Step 1: Opens popup for seleting tire
@@ -266,63 +230,44 @@ export default function TireBarChart() {
 
   };
 
-  // Step 3: Actually delete item after confirmation (TODO: We inserted 'async' to the function signature!)
+  // Step 3: Actually delete item after confirmation
   const confirmDelete = async () => {
     
     console.log(`selectedItem: ${selectedItem}`)
 
     if (!selectedItem) return;
 
-    try {
-      await axios.delete(`http://localhost:8000/tires/`, {
-        params: { name: selectedItem }
+
+    // axios treats 'params' as special, it appends each key : value pair in the query path parameter
+    deleteTire({
+      params: {
+        name : selectedItem
+      }
     });
       
-      setData((prev) => prev.filter(item => item.name !== selectedItem));
-      setShowPopup(false);
-      setShowConfirmPopup(false);
-      setSelectedItem(null);
-    } catch (err) {
-      console.error("Error deleting tire:", err);
-    }
+    setData((prev) => prev.filter(item => item.name !== selectedItem));
+    setShowPopup(false);
+    setShowConfirmPopup(false);
+    setSelectedItem(null);
+  } 
       
-  }
-
-   // Add item  (TODO: We inserted 'async' to the function signature!)
+   // Add item
    const handleCreateTire = async () => {
-    /*
-    if (!newTireName || !newAmount || !usedAmount) return;
-
-    const newItem = {
-      name: newTireName.trim(),
-      new: Number(newAmount),
-      used: Number(usedAmount),
-    };
-
-    setData((prev) => [...prev, newItem]);
-    // Reset add popup inputs
-    setNewTireName("");
-    setNewAmount("");
-    setUsedAmount("");
-    setShowAddPopup(false);
-    */  
-    if (!newTireName || !newAmount || !usedAmount) return;
     
-    // let ifSpaceInTireName = newTireName.split(/\s+/).length > 1;
+    if (!newTireName || !newAmount || !usedAmount) return;
 
-
-    try {
-      const res = await axios.post("http://localhost:8000/tires/create", {
+    const res = await createTire(
+      {
         name: newTireName.trim().toUpperCase(),
         new: Number(newAmount),
-        used: Number(usedAmount),
-      });
-      setData((prev) => [...prev, res.data]);
-      setShowAddPopup(false);
-      setNewTireName(""); setNewAmount(""); setUsedAmount("");
-    } catch (err) {
-      console.error("Error adding tire:", err);
-    }  
+        used: Number(usedAmount)
+      }
+    )
+    
+    setData((prev) => [...prev, res.data]);
+    setShowAddPopup(false);
+    setNewTireName(""); setNewAmount(""); setUsedAmount("");
+      
   };
 
   const downloadLogs = async () => {
@@ -364,18 +309,16 @@ export default function TireBarChart() {
     } catch (error) {
       console.error("Error downloading logs as CSV:", error);
     }
-  
   }
   
   const handleSave = (updatedTire) => {
-    setNumTiresList(prev =>
+    // Replace the old tire data with the updated one
+    setData(prev =>
       prev.map(t => t.id === updatedTire.id ? updatedTire : t)
     );
-  
     setEditingNumTires(null);  // close modal
   };
   
-
   return (
     <div
       style={{
@@ -385,57 +328,19 @@ export default function TireBarChart() {
         height: "300px",
       }}
     >
-      
-      
+            
       {/* ---------------------START OF TABLE FOR TIRE INVENTORY */}
-      
-      {/* <h2>Tire Inventory</h2>
-      <div 
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          // alignItems: "center"
-        }}
-        >
-        
-        
-        <table border={1} cellPadding={10}>
-          <thead>
-            <tr>
-              <th>Tire Name</th>
-              <th>New</th>
-              <th>Used</th>
-            </tr>
-          </thead>
-          <tbody>
-            {numTiresList.map(tire => (
-              <tr key={tire.id}>
-                <td>{tire.name}</td>
-                <td>{tire.new}</td>
-                <td>{tire.used}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div> */}
-      {console.log("TireList: ", numTiresList)}
+
       {console.log("selectedItem: ", selectedItem)}
       
       {editingNumTires && (
-        <EditTireModal
-          tireList={numTiresList}
+        <TireEditModal
+          tireList={data}
           onClose={() => setEditingNumTires(null)}
           onSave={handleSave}
         />
       )}
       
-
-        
-
-          
-
-
-
       <div>
        {/* Download Logs Button */}
        <button

@@ -1,3 +1,5 @@
+Web Application:
+
 env (assuming you already have a venv folder by running: python3 -m venv venv):
 source venv/bin/activate
 
@@ -8,3 +10,10 @@ uvicorn main:app --reload --port 8000
 frontend: 
 cd client
 npm run dev
+
+
+Ngrok (testing - ngrokservername -> localhost:5678):
+ngrok http 5678 
+
+n8n:
+n8n start

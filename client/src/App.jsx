@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import carlbadautoLogo from '/logo-carl.png'
 import './App.css'
-import TireBarChart from '../components/newTires'
+import TireBarChart from '../inventory/components/tirePage'
+// import OilFilterBarChart from '../components/oilPage'
+// import OilBarChart from '../components/oilPage'
+// import LightbulbBarChart from '../components/lightbulbPage'
+// import HeadlightBarChart from '../components/headlightPage'
+// import BrakeLinesBarChart from '../components/brakelinePage'
+// import RimBarChart from '../components/rimPage'
 
 function App() {
 
@@ -22,23 +28,27 @@ function App() {
       </div>
 
       <div className='oil-filter-chart-container'>
-          {/* <TireBarChart/> */}
+          {/* <oilFilterBarChart/> */}
       </div>
 
       <div className='oil-chart-container'>
-          {/* <TireBarChart/> */}
+          {/* <OilBarChart/> */}
       </div>
 
-      <div className='lightbult-chart-container'>
-          {/* <TireBarChart/> */}
+      <div className='lightbulb-chart-container'>
+          {/* <LightbulbBarChart/> */}
       </div>
 
       <div className='headlight-chart-container'>
-          {/* <TireBarChart/> */}
+          {/* <headlightBarChart/> */}
       </div>
 
-      <div className='brakelines-chart-container'>
-          {/* <TireBarChart/> */}
+      <div className='brakeline-chart-container'>
+          {/* <brakelineBarChart/> */}
+      </div>
+
+      <div className='rim-chart-container'>
+          {/* <rimBarChart/> */}
       </div>
 
     </>

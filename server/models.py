@@ -29,6 +29,17 @@ class Tire(Base):
     new = Column(Integer, nullable=False)
     used = Column(Integer, nullable=False)
 
+# NOTE: Generic class that will change implementation based on what prop is passed into it
+# class Item(Base):
+#     __tablename__ = "items"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     category = Column(String, index=True) # tire, oil, oilfilter, lightbulb, etc. -> No duplicated tables or endpoints
+#     name = Column(String, unique=True, nullable=False)
+#     new = Column(Integer, nullable=False)
+#     used = Column(Integer, nullable=False)
+
+
 class Threshold(Base):
     __tablename__ = "threshold"
 

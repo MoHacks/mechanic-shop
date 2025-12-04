@@ -86,6 +86,8 @@ async def create_tire(tire: TireCreate, db: Session = Depends(get_db)):
     
 
 # DELETE tire
+
+# name: str is expected to come in as a query parameter -> DELETE /tires/?name=SomeName
 @router.delete("/")
 async def delete_tire(name: str, db: Session = Depends(get_db)):
     tire = db.query(Tire).filter(Tire.name == name).first()
@@ -176,6 +178,19 @@ async def update_tire(
 
     tire.new = new
     tire.used = used
+
+    # Check log count, if its greater than 10, delete the oldest record (to keep the db size small to save space)
+    log_count = db.query(Log).count()
+    if log_count >= 1000:
+        # Delete the oldest log
+        oldest_log = db.query(Log).order_by(Log.created_at.asc()).first()
+        if oldest_log:
+            db.delete(oldest_log)
+
+    db.add(Log(
+        action=f"updated Tire '{tire.name}' ({tire.new} new, {tire.used} used)",
+        created_at=datetime.utcnow()
+    ))
 
     db.commit()
     db.refresh(tire)

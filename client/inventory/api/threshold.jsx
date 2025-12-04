@@ -1,7 +1,9 @@
+// NOTE: MIGHT BE USELESS
+/*
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-export default function ThresholdControl() {
+export default function changeTireThreshold() {
   const [threshold, setThreshold] = useState(0);
 
   // Fetch the current threshold on component mount
@@ -22,14 +24,4 @@ export default function ThresholdControl() {
       })
       .catch(err => console.error(err));
   };
-
-//   return (
-//     <div>
-//       <label>
-//         Threshold: 
-//         <input type="number" value={threshold} onChange={handleChange} />
-//       </label>
-//       <button onClick={handleUpdate}>Update Threshold</button>
-//     </div>
-//   );
-}
+*/
