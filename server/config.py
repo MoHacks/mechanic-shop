@@ -7,3 +7,8 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 settings = Settings()
+
+
+# from dotenv import load_dotenv
+# load_dotenv()  # Now DATABASE_URL will be in os.environ
+

@@ -11,6 +11,7 @@ Pydantic validates incoming data and shapes outgoing data.
 
 '''
 
+from unicodedata import category
 from pydantic import BaseModel
 
 # Common fields shared between requests/responses
@@ -24,12 +25,12 @@ class TireCreate(TireBase):
     pass
 
 # Response model — includes id and orm_mode for database objects
+# The Config tells Pydantic:
+# “You are allowed to create this Pydantic model from object attributes, not just from dictionaries.”
 class Tire(TireBase):
     id: int
     class Config:
         from_attributes = True
-
-
 
 
 class ThresholdBase(BaseModel):
@@ -42,4 +43,15 @@ class ThresholdUpdate(ThresholdBase):
 class Threshold(ThresholdBase):
     id: int
     class Config:
-        from_attributes = True # allows ORM → Pydantic conversion
+        from_attributes = True # allows SQLAlchemy ORM → Pydantic conversion
+
+
+class Item(BaseModel):
+    category: str
+    name: str
+    mode: str
+    new: int
+    used: int
+
+class ItemCreate(Item):
+    pass

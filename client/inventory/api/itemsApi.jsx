@@ -2,18 +2,20 @@ import axios from "axios";
 
 const BASE_URL = "http://localhost:8000/items";
 
-export const getTires = async () => {
-    const response = await axios.get(`${BASE_URL}/`);
+export const getItems = async (category) => {
+    console.log("category: ", category)
+    const response = await axios.get(`${BASE_URL}/`, { params: { category } });
+    console.log(response.data)
     return response.data;
 }
 
-export const getTireThreshold = async () => {
+export const getItemThreshold = async () => {
 
     const response = await axios.get(`${BASE_URL}/threshold`);
     return response.data;
 }
 
-export const changeTireThreshold = async (value) => {
+export const changeItemThreshold = async (value) => {
 
     const response = await axios.put(`${BASE_URL}/threshold`, {value: value })
     // .then(res => console.log("res: ", res.data))
@@ -21,21 +23,22 @@ export const changeTireThreshold = async (value) => {
     return response.data;
 }
 
-export const createTire = async (payload) => {
+export const createItem = async (payload) => {
 
     try{
         const response = await axios.post(`${BASE_URL}/create`, payload)
         return response;
     }
     catch(err){
-        console.log("Error adding Tire: ", err)
+        console.log("Error adding Item: ", err)
     }
 }
 
-export const deleteTire = async (payload) => {
+export const deleteItem = async (payload) => {
     
     try {
-        //its the same as doing `${BASE_URL}?name=${name}`
+        //its the same as doing `${BASE_URL}?name=${name}&category={category}`
+        console.log("payload:", payload)
         const response = await axios.delete(`${BASE_URL}`, payload);   
         return response;
     }  
@@ -44,14 +47,16 @@ export const deleteTire = async (payload) => {
     }    
 }
 
-export const updateTires = async (payload) => {
-
+export const updateItem = async (payload) => {
+    console.log("within updateItem")
     try{
+       
+        console.log("UPDATED ITEM PAYLOAD: ", payload)
         // its the same as doing `${BASE_URL}/update?name=${name}&new=${newQty}&used=${usedQty}`
-        const response = axios.put(`${BASE_URL}/update`, null, payload);
+        const response = axios.put(`${BASE_URL}/update`, payload);
         return response;
     }
     catch(err){
-        console.error("Error adding tire: ", err)
+        console.error("Error adding Item: ", err)
     }
 }

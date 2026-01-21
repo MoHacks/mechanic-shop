@@ -44,6 +44,7 @@ export default function TireEditModal({tireList, onClose, onSave}) {
       updateTires({
         params: { 
           name: selectedTireName,
+          category: "tires",
           new: newTireQty,
           used: usedTireQty
         }

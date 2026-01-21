@@ -17,3 +17,9 @@ ngrok http 5678
 
 n8n:
 n8n start
+
+
+Want to inject data?
+python3 -m injectData.inject_tires
+python3 -m injectData.inject_oils
+...

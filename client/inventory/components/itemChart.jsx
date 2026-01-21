@@ -14,22 +14,45 @@ import {
 } from "recharts";
 import axios from "axios";
 
-import { getTires, getTireThreshold, changeTireThreshold, createTire, deleteTire} from "../api/tiresApi";
+import { getItems, changeItemThreshold, createItem, deleteItem, getItemThreshold } from "../api/itemsApi";
+
+// NOTE: CHANGE THIS TO A GENERIC FILE!
 import TireEditModal from "../modals/tiresEditModal";
+import EditItemModal from "../modals/itemEditModal";
 // import {jsPDF} from "jspdf";
 // import autoTable from "jspdf-autotable";
 
-export default function TireBarChart() {
+
+// NOTE: The category that is being passed into ItemChart will determine what bar chart to manipulate!
+export default function ItemChart({ category }) {
 
   // Interpolates between red and green
   // multiplying by 0.5 makes the gradient better distributed
-  const getGreenRatio = (value, maxValue) => value / (maxValue * 0.5);
+
+  //   const getGreenRatio = (value, maxValue) => value / (maxValue * 0.5);
+
+
+  const getRatio = (value, maxValue, category) => {
+    if (category == "oils"){
+        return value / (maxValue * 0.5); // oils use yellow ratio
+    }
+
+    if (category == "tires"){
+        return value / (maxValue * 0.5);
+    }
+
+    if (category == "oilfilters"){
+        return value / (maxValue * 0.5);
+    }
+
+    return value / (maxValue * 0.5);
+  } 
 
   // Threshold of Tires
   const [threshold, setThreshold] = useState(0);
   
   // Tire Data coming from database
-  const [data, setData] = useState([]);
+  const [itemsData, setItemsData] = useState([]);
 
   // TODO: Likely get rid of this since the `data` variable contains the same information!
   const[editingNumTires, setEditingNumTires] = useState(false);
@@ -46,18 +69,19 @@ export default function TireBarChart() {
    const [newAmount, setNewAmount] = useState("");
    const [usedAmount, setUsedAmount] = useState("");
  
-   const maxValue = Math.max(...data.flatMap((d) => [d.new, d.used]));
+   const maxValue = Math.max(...itemsData.flatMap((d) => [d.new, d.used]));
 
 
-  const fetchTires = async () => {
-    const tireData = await getTires();
-    setData(tireData);
+  const fetchItems = async () => {
+    const itemsData = await getItems(category);
+    setItemsData(itemsData);
+    console.log("itemsData within fetchItems(): ", itemsData)
   };
 
   const fetchThreshold = async () => {
 
       // Fetch the current threshold on component mount
-     const thresholdData = await getTireThreshold();
+     const thresholdData = await getItemThreshold();
      try{
       setThreshold(thresholdData.value)}
 
@@ -70,7 +94,7 @@ export default function TireBarChart() {
   useEffect(() => {
 
     // Fetch tires on load!
-    fetchTires();
+    fetchItems();
 
     // Fetch Threshold on load!
     fetchThreshold();
@@ -90,7 +114,7 @@ export default function TireBarChart() {
       if (message === "tire_created" || message === "tire_deleted" 
           || message === "tire_added" || message === "tire_removed" ||
              message === "tire_updated") {
-        fetchTires();
+        fetchItems();
       }
 
       if (message === "threshold_changed"){
@@ -106,7 +130,7 @@ export default function TireBarChart() {
     // Cleanup when component unmounts
     return () => ws.close();    
 
-  }, []); //runs once
+  }, [category]); //runs once per category! TODO: See what happens if category is removed!
 
 
   // Update backend when threshold changes
@@ -114,7 +138,7 @@ export default function TireBarChart() {
     const value = Number(e.target.value);
     
     // Changes the backend to reflect the updated threshold value change
-    changeTireThreshold(value);
+    changeItemThreshold(value);
 
     setThreshold(value);
   };
@@ -136,38 +160,40 @@ export default function TireBarChart() {
   // Step 3: Actually delete item after confirmation
   const confirmDelete = async () => {
     
-    console.log(`selectedItem: ${selectedItem}`)
+    console.log(`selectedItem to confirmDelete: ${selectedItem}`)
 
     if (!selectedItem) return;
 
-
     // axios treats 'params' as special, it appends each key : value pair in the query path parameter
-    deleteTire({
+    deleteItem({
       params: {
-        name : selectedItem
+        name : selectedItem,
+        category: category
       }
     });
       
-    setData((prev) => prev.filter(item => item.name !== selectedItem));
+    setItemsData((prev) => prev.filter(item => item.name !== selectedItem));
     setShowPopup(false);
     setShowConfirmPopup(false);
     setSelectedItem(null);
   } 
       
    // Add item
-   const handleCreateTire = async () => {
+   const handleCreateItem = async () => {
     
     if (!newTireName || !newAmount || !usedAmount) return;
 
-    const res = await createTire(
+    const res = await createItem(
       {
+        category: category,
         name: newTireName.trim().toUpperCase(),
+        mode: "dual", //TODO: Change this eventually to be dynamic
         new: Number(newAmount),
         used: Number(usedAmount)
       }
     )
     
-    setData((prev) => [...prev, res.data]);
+    setItemsData((prev) => [...prev, res.data]);
     setShowAddPopup(false);
     setNewTireName(""); setNewAmount(""); setUsedAmount("");
       
@@ -216,7 +242,7 @@ export default function TireBarChart() {
   
   const handleSave = (updatedTire) => {
     // Replace the old tire data with the updated one
-    setData(prev =>
+    setItemsData(prev =>
       prev.map(t => t.id === updatedTire.id ? updatedTire : t)
     );
     setEditingNumTires(null);  // close modal
@@ -235,11 +261,11 @@ export default function TireBarChart() {
       {/* ---------------------START OF TABLE FOR TIRE INVENTORY */}
 
       {console.log("selectedItem: ", selectedItem)}
-      
+      {console.log("itemsData: ", itemsData)}
       {editingNumTires && (
-        <TireEditModal
-          tireList={data}
-          category="tires"
+        <EditItemModal
+          itemList={itemsData}
+          category={category}
           onClose={() => setEditingNumTires(null)}
           onSave={handleSave}
         />
@@ -247,7 +273,8 @@ export default function TireBarChart() {
       
       <div>
        {/* Download Logs Button */}
-       <button
+       {category === "tires" && (
+        <button
           onClick={() => downloadLogs()}
             style={{
               background: "black",
@@ -260,9 +287,12 @@ export default function TireBarChart() {
             }}
           >
             Download Previous 1000 Logs
-          </button>
+        </button>)}
 
-      <label style={{
+
+        {/* TODO: GET RID OF THIS CATEGORY === "tires" part, we need to be able to set different thresholds for all inventory */}
+        {category === "tires" && (
+        <label style={{
               display: "flex",
               justifySelf: "center",
               alignSelf: "center"
@@ -274,7 +304,7 @@ export default function TireBarChart() {
           onChange={handleThresholdChange}
           style={{ marginLeft: "10px" }}
         />
-      </label>
+      </label>)}
 
       </div>
       
@@ -283,38 +313,153 @@ export default function TireBarChart() {
         
       <ResponsiveContainer width="100%" height="100%">
         
-        <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <BarChart data={itemsData} margin={{ top: 5, right: 30, left: 20, bottom: 10 }}>
+        {console.log("category within BarChart rendering: ", category)}
           <defs>
-            {data.map((entry, index) => {
-              const ratioNew = getGreenRatio(entry.new, maxValue);
-              const ratioUsed = getGreenRatio(entry.used, maxValue);
-              const greenNew = Math.round(255 * ratioNew);
-              const greenUsed = Math.round(255 * ratioUsed);
-              const redNew = Math.round(255 * (1 - ratioNew));
-              const redUsed = Math.round(255 * (1 - ratioUsed));
+            {itemsData.map((entry, index) => {
+                const ratioNew = getRatio(entry.new, maxValue, category);
+                const ratioUsed = getRatio(entry.used, maxValue, category);
+                
+                if (category === "tires") {
+                    console.log("within tires")
+                    // ✅ Tires = Red → Green (your existing behavior)
+                    const greenNew = Math.round(255 * ratioNew);
+                    const greenUsed = Math.round(255 * ratioUsed);
+                    const redNew = Math.round(255 * (1 - ratioNew));
+                    const redUsed = Math.round(255 * (1 - ratioUsed));
+                
+                    return (
+                    <React.Fragment key={index}>
+                        <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                        <stop offset="0%" stopColor={`rgb(255,0,0)`} />
+                        <stop offset="100%" stopColor={`rgb(${redNew},${greenNew},0)`} />
+                        </linearGradient>
+                
+                        <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                        <stop offset="0%" stopColor={`rgb(255,0,0)`} />
+                        <stop offset="100%" stopColor={`rgb(${redUsed},${greenUsed},0)`} />
+                        </linearGradient>
+                    </React.Fragment>
+                    );
+                }
 
-              return (
-                <React.Fragment key={index}>
-                  {/* gradient for 'new' */}
-                  <linearGradient id={`grad-new-${index}`} x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stopColor={`rgb(255,0,0)`} /> {/* bottom = red */}
-                    <stop offset="100%" stopColor={`rgb(${redNew},${greenNew},0)`} /> {/* top = mixed red/green */}
-                  </linearGradient>
-
-                  {/* gradient for 'used' */}
-                  <linearGradient id={`grad-used-${index}`} x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stopColor={`rgb(255,0,0)`} />
-                    <stop offset="100%" stopColor={`rgb(${redUsed},${greenUsed},0)`} />
-                  </linearGradient>
-                </React.Fragment>
-              );
+                if (category === "oils") {
+                  // 🔶 Oils = Yellow gradient
+                  console.log("within oils")
+                  const yellowNew = Math.round(255 * ratioNew);
+                  const yellowUsed = Math.round(255 * ratioUsed);
+                  const redNew = Math.round(255 * (1 - ratioNew));
+                  const redUsed = Math.round(255 * (1 - ratioUsed));
+              
+                  return (
+                    <React.Fragment key={index}>
+                      <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                        <stop offset="0%" stopColor={`rgb(255, 0, 191)`} />     {/* dark yellow */}
+                        <stop offset="100%" stopColor={`rgb(255, 255, 0)`} />
+                      </linearGradient>
+              
+                      <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                        <stop offset="0%" stopColor={`rgb(255, 0, 191)`} />
+                        <stop offset="100%" stopColor={`rgb(255,255,0)`} />
+                      </linearGradient>
+                    </React.Fragment>
+                  );
+                }
+                if (category === "oilfilters") {
+                    // 🔶 Oilfilters = purple gradient
+                    console.log("within oilfilters")
+                    const purpleNew = Math.round(255 * ratioNew);
+                    const purpleUsed = Math.round(255 * ratioUsed);
+                    const random_ = Math.round(255 * (1 - ratioNew));
+                    const random2_ = Math.round(255 * (1 - ratioUsed));
+                
+                    return (
+                      <React.Fragment key={index}>
+                        <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor={`rgb(136, 0, 255)`} />     {/* dark yellow */}
+                          <stop offset="100%" stopColor={`rgb(255, 255, 255)`} />
+                        </linearGradient>
+                
+                        <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor={`rgb(136, 0, 255)`} />
+                          <stop offset="100%" stopColor={`rgb(255,255,255)`} />
+                        </linearGradient>
+                      </React.Fragment>
+                    );
+                  }
+                  if (category === "lightbulbs") {
+                    // 🔶 Oilfilters = purple gradient
+                    console.log("within lightbulbs")
+                    const purpleNew = Math.round(255 * ratioNew);
+                    const purpleUsed = Math.round(255 * ratioUsed);
+                    const random_ = Math.round(255 * (1 - ratioNew));
+                    const random2_ = Math.round(255 * (1 - ratioUsed));
+                
+                    return (
+                      <React.Fragment key={index}>
+                        <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor={`rgb(255, 0, 195)`} />     {/* dark yellow */}
+                          <stop offset="100%" stopColor={`rgb(0, 251, 255)`} />
+                        </linearGradient>
+                
+                        <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor={`rgb(255, 0, 195)`} />
+                          <stop offset="100%" stopColor={`rgb(0,251,255)`} />
+                        </linearGradient>
+                      </React.Fragment>
+                    );
+                  }
+                  if (category === "headlights") {
+                    // 🔶 Oilfilters = purple gradient
+                    console.log("within headlights")
+                    const purpleNew = Math.round(255 * ratioNew);
+                    const purpleUsed = Math.round(255 * ratioUsed);
+                    const random_ = Math.round(255 * (1 - ratioNew));
+                    const random2_ = Math.round(255 * (1 - ratioUsed));
+                
+                    return (
+                      <React.Fragment key={index}>
+                        <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor={`rgb(5, 1, 122)`} />     {/* dark yellow */}
+                          <stop offset="100%" stopColor={`rgb(255, 249, 127)`} />
+                        </linearGradient>
+                
+                        <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor={`rgb(5, 1, 122)`} />
+                          <stop offset="100%" stopColor={`rgb(255, 249, 127)`} />
+                        </linearGradient>
+                      </React.Fragment>
+                    );
+                  }
+                  if (category === "brakelines") {
+                    // 🔶 Oilfilters = purple gradient
+                    console.log("within brakelines")
+                    const purpleNew = Math.round(255 * ratioNew);
+                    const purpleUsed = Math.round(255 * ratioUsed);
+                    const random_ = Math.round(255 * (1 - ratioNew));
+                    const random2_ = Math.round(255 * (1 - ratioUsed));
+                
+                    return (
+                      <React.Fragment key={index}>
+                        <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor={`rgb(57, 2, 22)`} />     {/* dark yellow */}
+                          <stop offset="100%" stopColor={`rgb(255, 169, 137)`} />
+                        </linearGradient>
+                
+                        <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor={`rgb(57, 2, 22)`} />
+                          <stop offset="100%" stopColor={`rgb(255, 169, 137)`} />
+                        </linearGradient>
+                      </React.Fragment>
+                    );
+                  }
             })}
           </defs>
 
           <CartesianGrid strokeDasharray="0" vertical={false}/>
           <XAxis 
           dataKey="name"
-          label={{ value: 'Tire Names', position: "middle", fill: 'orange', dy: 15, dx: -33 }} 
+          label={{ value: category, position: "middle", fill: 'orange', dy: 15, dx: -33 }} 
           />
           <YAxis 
             stroke="white" 
@@ -328,8 +473,8 @@ export default function TireBarChart() {
             fill="blueviolet"
             activeBar={<Rectangle fill="blueviolet" stroke="blue" />}
             >
-            {data.map((entry, index) => (
-              <Cell key={`new-${index}`} fill={`url(#grad-new-${index})`} />
+            {itemsData.map((entry, index) => (
+              <Cell key={`new-${index}`} fill={`url(#grad-new-${index}-${category})`} />
             ))}
           </Bar>
 
@@ -337,8 +482,8 @@ export default function TireBarChart() {
             fill="chartreuse"
             activeBar={<Rectangle fill="chartreuse" stroke="blue" />}
           >
-            {data.map((entry, index) => (
-              <Cell key={`used-${index}`} fill={`url(#grad-used-${index})`} />
+            {itemsData.map((entry, index) => (
+              <Cell key={`used-${index}`} fill={`url(#grad-used-${index}-${category})`} />
             ))}
           </Bar>
           {/* Add a horizontal dotted red line at y = 250 */}
@@ -355,7 +500,7 @@ export default function TireBarChart() {
       </ResponsiveContainer>
       
       {/* Main Delete Button */}
-      <div style={{ display: "flex", flexDirection: "row", gap: "1rem", padding: "1rem", textAlign: "center", justifyContent: "center"}}>
+      <div style={{ display: "flex", flexDirection: "row", gap: "1rem", padding: "0.5rem", textAlign: "center", justifyContent: "center"}}>
         {/* <h4 style={{ marginBottom: "10px", alignSelf: "flex-start" }}>Delete Tire</h4> */}
         {/* Delete Item Button */}
         <button
@@ -458,7 +603,7 @@ export default function TireBarChart() {
             />
             <div style={{ marginTop: "15px", display: "flex", justifyContent: "space-between" }}>
               <button
-                onClick={handleCreateTire}
+                onClick={handleCreateItem}
                 disabled={spacesInTireName}
                 style={{ 
                   background: "green",
@@ -520,7 +665,7 @@ export default function TireBarChart() {
 
           <h4>Select an Item to Delete</h4>
           <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "8px" }}>
-            {data.map((item) => (
+            {itemsData.map((item) => (
               <label key={item.name} style={{ cursor: "pointer" }}>
                 <input
                   type="radio"

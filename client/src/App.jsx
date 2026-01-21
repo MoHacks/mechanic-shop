@@ -2,12 +2,8 @@ import { useState } from 'react'
 import carlbadautoLogo from '/logo-carl.png'
 import './App.css'
 import TireBarChart from '../inventory/components/tirePage'
-// import OilFilterBarChart from '../components/oilPage'
-// import OilBarChart from '../components/oilPage'
-// import LightbulbBarChart from '../components/lightbulbPage'
-// import HeadlightBarChart from '../components/headlightPage'
-// import BrakeLinesBarChart from '../components/brakelinePage'
-// import RimBarChart from '../components/rimPage'
+import ItemChart from '../inventory/components/ItemChart'
+
 
 function App() {
 
@@ -22,34 +18,38 @@ function App() {
         </h1>
       </div>
 
-
-      <div className='tire-chart-container'>
-          <TireBarChart/>
+       <div className='tire-chart-container'>
+          <ItemChart category="tires"/>
+      </div>
+      
+      <div className='oil-chart-container' style={{marginTop: "10rem"}}>
+        <ItemChart category="oils"/>
+      </div>
+     
+    
+    
+      <div className='oil-filter-chart-container' style={{marginTop: "5rem"}}>
+        <ItemChart category="oilfilters"/>
       </div>
 
-      <div className='oil-filter-chart-container'>
-          {/* <oilFilterBarChart/> */}
+    
+      <div className='lightbulb-chart-container' style={{marginTop: "5rem"}}>
+        <ItemChart category="lightbulbs"/>
+      </div>
+    
+    
+      <div className='headlight-chart-container' style={{marginTop: "5rem"}}>
+        <ItemChart category="headlights"/>
+      </div>
+    
+    
+      <div className='brakeline-chart-container' style={{marginTop: "5rem"}}>
+        <ItemChart category="brakelines"/>
       </div>
 
-      <div className='oil-chart-container'>
-          {/* <OilBarChart/> */}
-      </div>
-
-      <div className='lightbulb-chart-container'>
-          {/* <LightbulbBarChart/> */}
-      </div>
-
-      <div className='headlight-chart-container'>
-          {/* <headlightBarChart/> */}
-      </div>
-
-      <div className='brakeline-chart-container'>
-          {/* <brakelineBarChart/> */}
-      </div>
-
-      <div className='rim-chart-container'>
-          {/* <rimBarChart/> */}
-      </div>
+      {/* <div className='rim-chart-container' style={{marginTop: "5rem"}}>
+          <ItemChart category="rims"/>
+      </div> */}
 
     </>
   )
