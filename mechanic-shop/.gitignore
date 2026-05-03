@@ -1,0 +1,14 @@
+
+client/node_modules
+node_modules
+
+TODO.txt
+
+
+__pycache__/
+*.pyc
+
+server/venv
+.env
+
+server/my_database.db
