@@ -14,6 +14,8 @@ class ConnectionManager:
 
     async def broadcast(self, message: str):
         for connection in self.active_connections:
-            await connection.send_text(message)
-
+            try:
+                await connection.send_text(message)
+            except Exception:
+                self.active_connections.remove(connection)  # <- Removes the connection from list if connection is not valid
 manager = ConnectionManager()

@@ -2,7 +2,7 @@ from fastapi import FastAPI, WebSocket
 from websocket_manager import manager
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from routers import tires, logs, threshold, items
+from routers import tires, logs, threshold, items, whatsapp
 
 app = FastAPI(title="Tire Inventory API")
 
@@ -20,6 +20,7 @@ app.include_router(tires.router)
 app.include_router(logs.router)
 app.include_router(threshold.router)
 app.include_router(items.router)
+app.include_router(whatsapp.router)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

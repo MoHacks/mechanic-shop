@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     DATABASE_URL: str
+    TWILIO_AUTH_TOKEN: str
+    TWILIO_SID: str
 
     class Config:
         env_file = ".env"
