@@ -6,10 +6,6 @@ import os
 
 load_dotenv()  # loads your .env file
 DATABASE_URL = os.getenv("DATABASE_URL")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_SID = os.getenv("TWILIO_SID")
-
-print(DATABASE_URL, TWILIO_AUTH_TOKEN, TWILIO_SID)
 from db import Base # your metadata
 
 from alembic import context

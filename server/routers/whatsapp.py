@@ -10,10 +10,8 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()  # loads your .env file
-DATABASE_URL = os.getenv("DATABASE_URL")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_SID = os.getenv("TWILIO_SID")
-print(DATABASE_URL, TWILIO_AUTH_TOKEN, TWILIO_SID)
 
 router = APIRouter(prefix="/whatsapp", tags=["WhatsApp"])
 twilio_client = Client(TWILIO_SID,TWILIO_AUTH_TOKEN)
