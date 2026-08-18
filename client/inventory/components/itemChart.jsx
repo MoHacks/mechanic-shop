@@ -567,6 +567,7 @@ export default function ItemChart({ category }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            zIndex: 1000,
           }}
         >
           <div
@@ -643,7 +644,7 @@ export default function ItemChart({ category }) {
            
         <div
           style={{
-            position: "absolute",
+            position: "fixed",
             top: 0,
             left: 0,
             width: "100%",
@@ -652,8 +653,9 @@ export default function ItemChart({ category }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            zIndex: 1000,
           }}
-        > 
+        >
           <div
             style={{
               background: "#333",
@@ -732,6 +734,7 @@ export default function ItemChart({ category }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            zIndex: 1000,
           }}
         >
           <div
