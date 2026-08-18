@@ -16,11 +16,7 @@ import axios from "axios";
 
 import { getItems, changeItemThreshold, createItem, deleteItem, getItemThreshold } from "../api/itemsApi";
 
-// NOTE: CHANGE THIS TO A GENERIC FILE!
-import TireEditModal from "../modals/tiresEditModal";
 import EditItemModal from "../modals/itemEditModal";
-// import {jsPDF} from "jspdf";
-// import autoTable from "jspdf-autotable";
 
 
 // NOTE: The category that is being passed into ItemChart will determine what bar chart to manipulate!
