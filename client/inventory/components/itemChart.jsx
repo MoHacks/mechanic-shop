@@ -24,29 +24,7 @@ import EditItemModal from "../modals/itemEditModal";
 
 
 // NOTE: The category that is being passed into ItemChart will determine what bar chart to manipulate!
-export default function ItemChart({ category, onDelete }) {
-
-  // Interpolates between red and green
-  // multiplying by 0.5 makes the gradient better distributed
-
-  //   const getGreenRatio = (value, maxValue) => value / (maxValue * 0.5);
-
-
-  const getRatio = (value, maxValue, category) => {
-    if (category == "oils"){
-        return value / (maxValue * 0.5); // oils use yellow ratio
-    }
-
-    if (category == "tires"){
-        return value / (maxValue * 0.5);
-    }
-
-    if (category == "oilfilters"){
-        return value / (maxValue * 0.5);
-    }
-
-    return value / (maxValue * 0.5);
-  } 
+export default function ItemChart({ category, colorStart = "rgb(255,0,0)", colorEnd = "rgb(0,255,0)", onDelete }) {
 
   // Threshold of Tires
   const [threshold, setThreshold] = useState(0);
@@ -304,144 +282,18 @@ export default function ItemChart({ category, onDelete }) {
         <BarChart data={itemsData} margin={{ top: 5, right: 30, left: 20, bottom: 10 }}>
         {console.log("category within BarChart rendering: ", category)}
           <defs>
-            {itemsData.map((entry, index) => {
-                const ratioNew = getRatio(entry.new, maxValue, category);
-                const ratioUsed = getRatio(entry.used, maxValue, category);
-                
-                if (category === "tires") {
-                    console.log("within tires")
-                    // ✅ Tires = Red → Green (your existing behavior)
-                    const greenNew = Math.round(255 * ratioNew);
-                    const greenUsed = Math.round(255 * ratioUsed);
-                    const redNew = Math.round(255 * (1 - ratioNew));
-                    const redUsed = Math.round(255 * (1 - ratioUsed));
-                
-                    return (
-                    <React.Fragment key={index}>
-                        <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                        <stop offset="0%" stopColor={`rgb(255,0,0)`} />
-                        <stop offset="100%" stopColor={`rgb(${redNew},${greenNew},0)`} />
-                        </linearGradient>
-                
-                        <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                        <stop offset="0%" stopColor={`rgb(255,0,0)`} />
-                        <stop offset="100%" stopColor={`rgb(${redUsed},${greenUsed},0)`} />
-                        </linearGradient>
-                    </React.Fragment>
-                    );
-                }
-
-                if (category === "oils") {
-                  // 🔶 Oils = Yellow gradient
-                  console.log("within oils")
-                  const yellowNew = Math.round(255 * ratioNew);
-                  const yellowUsed = Math.round(255 * ratioUsed);
-                  const redNew = Math.round(255 * (1 - ratioNew));
-                  const redUsed = Math.round(255 * (1 - ratioUsed));
-              
-                  return (
-                    <React.Fragment key={index}>
-                      <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                        <stop offset="0%" stopColor={`rgb(255, 0, 191)`} />     {/* dark yellow */}
-                        <stop offset="100%" stopColor={`rgb(255, 255, 0)`} />
-                      </linearGradient>
-              
-                      <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                        <stop offset="0%" stopColor={`rgb(255, 0, 191)`} />
-                        <stop offset="100%" stopColor={`rgb(255,255,0)`} />
-                      </linearGradient>
-                    </React.Fragment>
-                  );
-                }
-                if (category === "oilfilters") {
-                    // 🔶 Oilfilters = purple gradient
-                    console.log("within oilfilters")
-                    const purpleNew = Math.round(255 * ratioNew);
-                    const purpleUsed = Math.round(255 * ratioUsed);
-                    const random_ = Math.round(255 * (1 - ratioNew));
-                    const random2_ = Math.round(255 * (1 - ratioUsed));
-                
-                    return (
-                      <React.Fragment key={index}>
-                        <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor={`rgb(136, 0, 255)`} />     {/* dark yellow */}
-                          <stop offset="100%" stopColor={`rgb(255, 255, 255)`} />
-                        </linearGradient>
-                
-                        <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor={`rgb(136, 0, 255)`} />
-                          <stop offset="100%" stopColor={`rgb(255,255,255)`} />
-                        </linearGradient>
-                      </React.Fragment>
-                    );
-                  }
-                  if (category === "lightbulbs") {
-                    // 🔶 Oilfilters = purple gradient
-                    console.log("within lightbulbs")
-                    const purpleNew = Math.round(255 * ratioNew);
-                    const purpleUsed = Math.round(255 * ratioUsed);
-                    const random_ = Math.round(255 * (1 - ratioNew));
-                    const random2_ = Math.round(255 * (1 - ratioUsed));
-                
-                    return (
-                      <React.Fragment key={index}>
-                        <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor={`rgb(255, 0, 195)`} />     {/* dark yellow */}
-                          <stop offset="100%" stopColor={`rgb(0, 251, 255)`} />
-                        </linearGradient>
-                
-                        <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor={`rgb(255, 0, 195)`} />
-                          <stop offset="100%" stopColor={`rgb(0,251,255)`} />
-                        </linearGradient>
-                      </React.Fragment>
-                    );
-                  }
-                  if (category === "headlights") {
-                    // 🔶 Oilfilters = purple gradient
-                    console.log("within headlights")
-                    const purpleNew = Math.round(255 * ratioNew);
-                    const purpleUsed = Math.round(255 * ratioUsed);
-                    const random_ = Math.round(255 * (1 - ratioNew));
-                    const random2_ = Math.round(255 * (1 - ratioUsed));
-                
-                    return (
-                      <React.Fragment key={index}>
-                        <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor={`rgb(5, 1, 122)`} />     {/* dark yellow */}
-                          <stop offset="100%" stopColor={`rgb(255, 249, 127)`} />
-                        </linearGradient>
-                
-                        <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor={`rgb(5, 1, 122)`} />
-                          <stop offset="100%" stopColor={`rgb(255, 249, 127)`} />
-                        </linearGradient>
-                      </React.Fragment>
-                    );
-                  }
-                  if (category === "brakelines") {
-                    // 🔶 Oilfilters = purple gradient
-                    console.log("within brakelines")
-                    const purpleNew = Math.round(255 * ratioNew);
-                    const purpleUsed = Math.round(255 * ratioUsed);
-                    const random_ = Math.round(255 * (1 - ratioNew));
-                    const random2_ = Math.round(255 * (1 - ratioUsed));
-                
-                    return (
-                      <React.Fragment key={index}>
-                        <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor={`rgb(57, 2, 22)`} />     {/* dark yellow */}
-                          <stop offset="100%" stopColor={`rgb(255, 169, 137)`} />
-                        </linearGradient>
-                
-                        <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor={`rgb(57, 2, 22)`} />
-                          <stop offset="100%" stopColor={`rgb(255, 169, 137)`} />
-                        </linearGradient>
-                      </React.Fragment>
-                    );
-                  }
-            })}
+            {itemsData.map((_, index) => (
+              <React.Fragment key={index}>
+                <linearGradient id={`grad-new-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stopColor={colorStart} />
+                  <stop offset="100%" stopColor={colorEnd} />
+                </linearGradient>
+                <linearGradient id={`grad-used-${index}-${category}`} x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stopColor={colorStart} />
+                  <stop offset="100%" stopColor={colorEnd} />
+                </linearGradient>
+              </React.Fragment>
+            ))}
           </defs>
 
           <CartesianGrid strokeDasharray="0" vertical={false}/>

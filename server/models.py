@@ -42,6 +42,14 @@ class Item(Base):
     used = Column(Integer, default=0)
     # threshold = Column(Integer, default=10) # <-- threshold for alerts
 
+class Category(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+    color_start = Column(String, nullable=False)
+    color_end = Column(String, nullable=False)
+
 class Threshold(Base):
     __tablename__ = "threshold"
 
