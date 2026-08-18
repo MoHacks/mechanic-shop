@@ -19,6 +19,14 @@ function App() {
 
   useEffect(() => {
     getCategories().then(setCategories);
+
+    const ws = new WebSocket("ws://localhost:8000/ws");
+    ws.onmessage = (event) => {
+      if (event.data === "category_created") {
+        getCategories().then(setCategories);
+      }
+    };
+    return () => ws.close();
   }, []);
 
   const regenerateColors = () => {
