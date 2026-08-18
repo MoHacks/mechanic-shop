@@ -255,7 +255,6 @@ export default function ItemChart({ category, onDelete }) {
         width: "100%",
         maxWidth: "1200px",
         margin: "0 auto",
-        height: "300px",
       }}
     >
             
@@ -312,7 +311,7 @@ export default function ItemChart({ category, onDelete }) {
       {/* ---------------------END OF TABLE FOR TIRE INVENTORY */}
 
         
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={300}>
         
         <BarChart data={itemsData} margin={{ top: 5, right: 30, left: 20, bottom: 10 }}>
         {console.log("category within BarChart rendering: ", category)}
