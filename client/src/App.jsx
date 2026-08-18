@@ -1,11 +1,16 @@
 import { useState } from 'react'
 import carlbadautoLogo from '/logo-carl.png'
 import './App.css'
-import TireBarChart from '../inventory/components/tirePage'
 import ItemChart from '../inventory/components/ItemChart'
 
-
 function App() {
+  const [visibleCategories, setVisibleCategories] = useState([
+    "tires", "oils", "oilfilters", "lightbulbs", "headlights", "brakelines"
+  ]);
+
+  const deleteCategory = (category) => {
+    setVisibleCategories(prev => prev.filter(c => c !== category));
+  };
 
   return (
     <>
@@ -13,46 +18,22 @@ function App() {
         <a target="_blank">
           <img src={carlbadautoLogo} className="logo" alt="carlbadauto logo" />
         </a>
-        <h1 style={{marginTop: 0, fontFamily: "Times New Roman", color : "orange"}}>
+        <h1 style={{ marginTop: 0, fontFamily: "Times New Roman", color: "orange" }}>
           Inventory Management System
         </h1>
       </div>
 
-       <div className='tire-chart-container'>
-          <ItemChart category="tires"/>
+      <div style={{ display: "flex", flexDirection: "column", gap: "7rem" }}>
+        {visibleCategories.map(category => (
+          <ItemChart
+            key={category}
+            category={category}
+            onDelete={() => deleteCategory(category)}
+          />
+        ))}
       </div>
-      
-      <div className='oil-chart-container' style={{marginTop: "10rem"}}>
-        <ItemChart category="oils"/>
-      </div>
-     
-    
-    
-      <div className='oil-filter-chart-container' style={{marginTop: "5rem"}}>
-        <ItemChart category="oilfilters"/>
-      </div>
-
-    
-      <div className='lightbulb-chart-container' style={{marginTop: "5rem"}}>
-        <ItemChart category="lightbulbs"/>
-      </div>
-    
-    
-      <div className='headlight-chart-container' style={{marginTop: "5rem"}}>
-        <ItemChart category="headlights"/>
-      </div>
-    
-    
-      <div className='brakeline-chart-container' style={{marginTop: "5rem"}}>
-        <ItemChart category="brakelines"/>
-      </div>
-
-      {/* <div className='rim-chart-container' style={{marginTop: "5rem"}}>
-          <ItemChart category="rims"/>
-      </div> */}
-
     </>
-  )
+  );
 }
 
 export default App
