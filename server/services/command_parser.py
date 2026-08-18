@@ -1,55 +1,72 @@
-import re
+import os
+import anthropic
+from dotenv import load_dotenv
+
+load_dotenv()
+
+_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_KEY"))
+
+_tools = [{
+    "name": "dispatch_command",
+    "description": "Parse a mechanic shop inventory command into a structured action.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "action": {
+                "type": "string",
+                "enum": ["create_tire", "add_quantity", "set_threshold", "delete_tire", "unknown"],
+                "description": "The type of action the user wants to perform."
+            },
+            "name": {
+                "type": "string",
+                "description": "Tire brand name. Required for create_tire, add_quantity, delete_tire."
+            },
+            "new": {
+                "type": "integer",
+                "description": "Number of new tires to add. Required for add_quantity."
+            },
+            "used": {
+                "type": "integer",
+                "description": "Number of used tires to add. Required for add_quantity."
+            },
+            "category": {
+                "type": "string",
+                "description": "Category for the threshold (e.g. 'tires'). Required for set_threshold."
+            },
+            "value": {
+                "type": "integer",
+                "description": "The threshold value to set. Required for set_threshold."
+            },
+            "raw_text": {
+                "type": "string",
+                "description": "Original text, only used when action is unknown."
+            }
+        },
+        "required": ["action"]
+    }
+}]
+
+_system = """You parse natural language commands for a mechanic shop tire inventory system.
+Extract the user's intent and call dispatch_command with the correct fields.
+
+Actions:
+- create_tire: user wants to register a new tire brand (e.g. "add michelin", "create tire bridgestone")
+- add_quantity: user wants to add new or used tires to an existing brand (e.g. "add 5 new to michelin", "put 3 used goodyear tires in")
+- set_threshold: user wants to change the low-stock alert threshold (e.g. "set threshold to 10", "change tire threshold to 150")
+- delete_tire: user wants to remove a tire brand (e.g. "delete michelin", "remove bridgestone")
+- unknown: intent cannot be determined
+
+For add_quantity, if the user does not specify new or used, default to new=quantity, used=0."""
+
 
 def parse_command(text: str) -> dict:
-    """
-    Parses a raw WhatsApp message into a structured command dict.
-
-    Supported phrasings:
-      - "create tire michelin"
-      - "add 5 new to michelin" / "add 5 used to michelin" / "add 5 to michelin"
-      - "set threshold tires to 10"
-      - "delete tire michelin" / "remove tire michelin"
-    """
-    text = text.strip().lower()
-
-    # "create tire michelin"
-    m = re.match(r"create tire (\w+)", text)
-    
-    if m:
-        return {"action": "create_tire", "name": m.group(1)}
-
-    # "add 5 new to michelin" / "add 5 used to michelin" / "add 5 to michelin"
-    m = re.match(r"add (\d+) (new|used)? ?(?:tires? )?to (\w+)", text)
-
-    # TODO: remove this later
-    print("m: ", m)
-    if m:
-        for i in range(len(m.groups()) + 1):
-            if m.group(i) is not None:
-                print("group: ", i, " : ", m.group(i))
-    if m:
-        qty = int(m.group(1))
-        tire_type = m.group(2) or "new"  # default to "new" if unspecified
-        return {
-            "action": "add_quantity",
-            "name": m.group(3),
-            "new": qty if tire_type == "new" else 0,
-            "used": qty if tire_type == "used" else 0,
-        }
-
-    # "set threshold tires to 10"
-    m = re.match(r"set threshold (\w+) to (\d+)", text)
-    if m:
-        return {
-            "action": "set_threshold",
-            "category": m.group(1),
-            "value": int(m.group(2)),
-        }
-
-    # "delete tire michelin" / "remove tire michelin"
-    m = re.match(r"(?:delete|remove) tire (\w+)", text)
-    if m:
-        return {"action": "delete_tire", "name": m.group(1)}
-
-    return {"action": "unknown", "raw_text": text}
-
+    response = _client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=256,
+        system=_system,
+        tools=_tools,
+        tool_choice={"type": "any"},
+        messages=[{"role": "user", "content": text}]
+    )
+    tool_use = next(b for b in response.content if b.type == "tool_use")
+    return tool_use.input
