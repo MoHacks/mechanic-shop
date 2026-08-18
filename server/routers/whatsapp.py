@@ -18,6 +18,16 @@ TWILIO_SID = os.getenv("TWILIO_SID")
 router = APIRouter(prefix="/whatsapp", tags=["WhatsApp"])
 twilio_client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
 
+_COMMAND_HINT = """
+─────────────────────────
+💬 *Example commands:*
+• "Create a table for brakes"
+• "Add michelin to tires"
+• "Add 5 new and 2 used to michelin"
+• "Set tires threshold to 50"
+• "Delete michelin"
+─────────────────────────"""
+
 whisper_model = WhisperModel("medium", device="cpu", compute_type="int8")
 
 
@@ -42,7 +52,7 @@ async def process_whatsapp_message(body: str, from_number: str, media_url: str =
         if media_url and media_content_type and media_content_type.startswith("audio/"):
             body = transcribe_voice_note(media_url)
             print("BODY: ", body)
-        reply_text = await handle_command(db, body)
+        reply_text = await handle_command(db, body) + _COMMAND_HINT
     finally:
         db.close()
 
