@@ -71,7 +71,7 @@ export default function EditItemModal({itemList, category, onClose, onSave}) {
         <div className="modal-content" style={{
             background: "#222", padding: "20px", borderRadius: "10px", width: "150px"
         }}>
-          <h3>Edit Tire</h3>
+          <h3>Edit Item</h3>
           {/* TIRE NAME DROPDOWN */}
           <label>Tire Name:</label>
           <select

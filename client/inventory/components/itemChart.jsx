@@ -433,7 +433,7 @@ export default function ItemChart({ category, colorStart = "rgb(255,0,0)", color
               width: "320px",
             }}
           >
-            <h3>Add New Tire</h3>
+            <h3>Add New Item</h3>
             <input
               placeholder="Tire name"
               value={newTireName}
