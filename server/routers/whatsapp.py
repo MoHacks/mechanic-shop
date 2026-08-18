@@ -26,6 +26,8 @@ _COMMAND_HINT = """
 • "Add 5 new and 2 used to michelin"
 • "Set tires threshold to 50"
 • "Delete michelin"
+
+⚠️ To delete a chart, please use the browser.
 ─────────────────────────"""
 
 whisper_model = WhisperModel("medium", device="cpu", compute_type="int8")
