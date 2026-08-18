@@ -24,7 +24,7 @@ import EditItemModal from "../modals/itemEditModal";
 
 
 // NOTE: The category that is being passed into ItemChart will determine what bar chart to manipulate!
-export default function ItemChart({ category }) {
+export default function ItemChart({ category, onDelete }) {
 
   // Interpolates between red and green
   // multiplying by 0.5 makes the gradient better distributed
@@ -65,6 +65,7 @@ export default function ItemChart({ category }) {
  
    // Add popup states
    const [showAddPopup, setShowAddPopup] = useState(false);
+   const [showDeleteChartConfirm, setShowDeleteChartConfirm] = useState(false);
    const [newTireName, setNewTireName] = useState("");
    const [newAmount, setNewAmount] = useState("");
    const [usedAmount, setUsedAmount] = useState("");
@@ -547,6 +548,21 @@ export default function ItemChart({ category }) {
         >
           Update Entries
         </button>
+
+        {/* Delete Chart */}
+        <button
+          onClick={() => setShowDeleteChartConfirm(true)}
+          style={{
+            background: "#444",
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          Delete Chart
+        </button>
         
          
 
@@ -721,6 +737,71 @@ export default function ItemChart({ category }) {
       </div>
       )}
       
+      {/* ----------CONFIRM DELETE CHART POPUP---------- */}
+      {showDeleteChartConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: "#1a1a1a",
+              padding: "30px",
+              borderRadius: "10px",
+              width: "380px",
+              textAlign: "center",
+              border: "1px solid #555",
+            }}
+          >
+            <h3 style={{ color: "white", marginTop: 0 }}>Delete <span style={{ color: "orange", textTransform: "capitalize" }}>{category}</span> Chart?</h3>
+            <p style={{ color: "#ccc" }}>
+              This will remove the <strong style={{ color: "white" }}>{category}</strong> chart from the page.
+            </p>
+            <p style={{ color: "red", fontWeight: "bold" }}>
+              ⚠ This operation cannot be undone.
+            </p>
+            <div style={{ marginTop: "24px", display: "flex", justifyContent: "center", gap: "12px" }}>
+              <button
+                onClick={() => setShowDeleteChartConfirm(false)}
+                style={{
+                  background: "#555",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onDelete}
+                style={{
+                  background: "#c0392b",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Yes, Delete Chart
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ----------CONFIRM DELETE TIRE POPUP---------- */}
       {showConfirmPopup && (
         <div
