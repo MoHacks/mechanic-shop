@@ -19,9 +19,9 @@ async def handle_command(db: Session, text: str) -> str:
 
         elif action == "set_threshold":
             threshold_update = ThresholdUpdate(value=parsed["value"])
-            threshold = await threshold_service.set_threshold(db, threshold_update)
-            # TODO: MAKE SURE TO INCLUDE CATEGORIES LATER....
-            return f"✅ Threshold set to {threshold.value}."
+            category = parsed.get("category", "tires")
+            threshold = await threshold_service.set_threshold(db, category, threshold_update)
+            return f"✅ Threshold for '{category}' set to {threshold.value}."
 
         elif action == "delete_tire":
             await items_service.delete_tire(db, name=parsed["name"])
