@@ -8,7 +8,12 @@ TODO.txt
 __pycache__/
 *.pyc
 
-server/venv
+server/venv/
 .env
 
 server/my_database.db
+
+# Runtime artifacts
+server/backend.log
+.backend_pid
+.frontend_pid
