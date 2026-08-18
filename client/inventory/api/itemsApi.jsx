@@ -9,17 +9,13 @@ export const getItems = async (category) => {
     return response.data;
 }
 
-export const getItemThreshold = async () => {
-
-    const response = await axios.get(`${BASE_URL}/threshold`);
+export const getItemThreshold = async (category) => {
+    const response = await axios.get(`${BASE_URL}/threshold`, { params: { category } });
     return response.data;
 }
 
-export const changeItemThreshold = async (value) => {
-
-    const response = await axios.put(`${BASE_URL}/threshold`, {value: value })
-    // .then(res => console.log("res: ", res.data))
-    // .catch(err => console.log("error :", err));
+export const changeItemThreshold = async (category, value) => {
+    const response = await axios.put(`${BASE_URL}/threshold`, { value }, { params: { category } });
     return response.data;
 }
 

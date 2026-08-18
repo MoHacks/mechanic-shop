@@ -45,5 +45,6 @@ class Item(Base):
 class Threshold(Base):
     __tablename__ = "threshold"
 
-    id = Column(Integer, primary_key = True, index = True)
-    value = Column(Integer, nullable = False)
+    id = Column(Integer, primary_key=True, index=True)
+    category = Column(String, nullable=False, unique=True)
+    value = Column(Integer, nullable=False)

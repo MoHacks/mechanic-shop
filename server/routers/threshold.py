@@ -2,46 +2,31 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from db import get_db
 from models import Threshold
-
-# It is so important that this Threshold value is renamed because it clashes with the Threshold name from models.py
 from schemas import Threshold as ThresholdSchema, ThresholdUpdate
 from websocket_manager import manager
 
 router = APIRouter(prefix="/items/threshold", tags=["Threshold"])
 
-@router.get("/", response_model=ThresholdSchema)
-async def get_threshold(db : Session = Depends(get_db)):
-    # await manager.broadcast("threshold_changed")
-    return db.query(Threshold).first() 
-
-
-# threshold is of typic pydanctic object
-@router.put("/", response_model=ThresholdSchema) # function 
-async def set_threshold(threshold_update: ThresholdUpdate, request: Request, db: Session = Depends(get_db)):
-    
-    print(await request.json())  # This will show exactly what body FastAPI received
-
-    # DB object
-    threshold = db.query(Threshold).first()
-
-    print("ok1")
-
-    # if no entries in database
+@router.get("/")
+async def get_threshold(category: str, db: Session = Depends(get_db)):
+    threshold = db.query(Threshold).filter(Threshold.category == category).first()
     if not threshold:
-        # create a new threshold
-        threshold = Threshold(value=threshold_update.value)
-        db.add(threshold)
-    else:
-        threshold.value = threshold_update.value
-    
-    print("ok2")
-    db.commit()
-
-    db.refresh(threshold)
-
-    await manager.broadcast("threshold_changed")
-    print("ok3")
+        return {"id": 0, "category": category, "value": 0}
     return threshold
 
 
+@router.put("/", response_model=ThresholdSchema)
+async def set_threshold(category: str, threshold_update: ThresholdUpdate, db: Session = Depends(get_db)):
+    threshold = db.query(Threshold).filter(Threshold.category == category).first()
 
+    if not threshold:
+        threshold = Threshold(category=category, value=threshold_update.value)
+        db.add(threshold)
+    else:
+        threshold.value = threshold_update.value
+
+    db.commit()
+    db.refresh(threshold)
+
+    await manager.broadcast("threshold_changed")
+    return threshold

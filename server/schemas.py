@@ -35,13 +35,13 @@ class Tire(TireBase):
 
 class ThresholdBase(BaseModel):
     value: int
-    
 
 class ThresholdUpdate(ThresholdBase):
     pass
 
 class Threshold(ThresholdBase):
     id: int
+    category: str
     class Config:
         from_attributes = True # allows SQLAlchemy ORM → Pydantic conversion
 

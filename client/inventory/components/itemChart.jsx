@@ -80,14 +80,11 @@ export default function ItemChart({ category, onDelete }) {
   };
 
   const fetchThreshold = async () => {
-
-      // Fetch the current threshold on component mount
-     const thresholdData = await getItemThreshold();
-     try{
-      setThreshold(thresholdData.value)}
-
-     catch (err){
-      err => console.log("Check out this error: ", err)
+     const thresholdData = await getItemThreshold(category);
+     try {
+       setThreshold(thresholdData.value);
+     } catch (err) {
+       console.log("Check out this error: ", err);
      }
   }
 
@@ -137,10 +134,7 @@ export default function ItemChart({ category, onDelete }) {
   // Update backend when threshold changes
   const handleThresholdChange = (e) => {
     const value = Number(e.target.value);
-    
-    // Changes the backend to reflect the updated threshold value change
-    changeItemThreshold(value);
-
+    changeItemThreshold(category, value);
     setThreshold(value);
   };
 
@@ -290,21 +284,15 @@ export default function ItemChart({ category, onDelete }) {
         </button>)}
 
 
-        {/* TODO: GET RID OF THIS CATEGORY === "tires" part, we need to be able to set different thresholds for all inventory */}
-        {category === "tires" && (
-        <label style={{
-              display: "flex",
-              justifySelf: "center",
-              alignSelf: "center"
-              }}>
-        Set Threshold:
-        <input
-          type="number"
-          value={threshold}
-          onChange={handleThresholdChange}
-          style={{ marginLeft: "10px" }}
-        />
-      </label>)}
+        <label style={{ display: "flex", justifySelf: "center", alignSelf: "center" }}>
+          Set Threshold:
+          <input
+            type="number"
+            value={threshold}
+            onChange={handleThresholdChange}
+            style={{ marginLeft: "10px" }}
+          />
+        </label>
 
       </div>
       

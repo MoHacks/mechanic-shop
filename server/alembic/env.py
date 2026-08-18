@@ -6,10 +6,6 @@ import os
 
 load_dotenv()  # loads your .env file
 DATABASE_URL = os.getenv("DATABASE_URL")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_SID = os.getenv("TWILIO_SID")
-
-print(DATABASE_URL, TWILIO_AUTH_TOKEN, TWILIO_SID)
 from db import Base # your metadata
 
 from alembic import context
@@ -80,8 +76,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, 
-            target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=True,  # required for SQLite ALTER operations
         )
 
         with context.begin_transaction():
