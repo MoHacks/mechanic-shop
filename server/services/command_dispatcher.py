@@ -77,7 +77,12 @@ async def handle_command(db: Session, text: str) -> str:
             above = [i for i in items if i.new > threshold.value or i.used > threshold.value]
             if not above:
                 return f"ℹ️ No items in '{category}' are above the threshold ({threshold.value})."
-            lines = "\n".join(f"• {i.name}: {i.new} new, {i.used} used" for i in above)
+            def _above_parts(i):
+                parts = []
+                if i.new > threshold.value: parts.append(f"{i.new} new")
+                if i.used > threshold.value: parts.append(f"{i.used} used")
+                return f"• {i.name}: {', '.join(parts)}"
+            lines = "\n".join(_above_parts(i) for i in above)
             return f"📈 Items in '{category}' above threshold ({threshold.value}):\n{lines}"
 
         elif action == "list_below_threshold":
@@ -89,7 +94,12 @@ async def handle_command(db: Session, text: str) -> str:
             below = [i for i in items if i.new < threshold.value or i.used < threshold.value]
             if not below:
                 return f"ℹ️ No items in '{category}' are below the threshold ({threshold.value})."
-            lines = "\n".join(f"• {i.name}: {i.new} new, {i.used} used" for i in below)
+            def _below_parts(i):
+                parts = []
+                if i.new < threshold.value: parts.append(f"{i.new} new")
+                if i.used < threshold.value: parts.append(f"{i.used} used")
+                return f"• {i.name}: {', '.join(parts)}"
+            lines = "\n".join(_below_parts(i) for i in below)
             return f"📉 Items in '{category}' below threshold ({threshold.value}):\n{lines}"
 
         elif action == "create_category":
