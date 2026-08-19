@@ -31,7 +31,7 @@ _tools = [{
             },
             "category": {
                 "type": "string",
-                "description": "Category for the threshold (e.g. 'tires'). Required for set_threshold."
+                "description": "Inventory category the item belongs to (e.g. 'tires', 'oils', 'oilfilters'). Required for all actions except create_category and unknown."
             },
             "value": {
                 "type": "integer",
@@ -50,17 +50,18 @@ _tools = [{
     }
 }]
 
-_system = """You parse natural language commands for a mechanic shop tire inventory system.
+_system = """You parse natural language commands for a mechanic shop inventory system.
 Extract the user's intent and call dispatch_command with the correct fields.
 
 Actions:
-- create_tire: user wants to register a new tire brand (e.g. "add michelin", "create tire bridgestone")
-- add_quantity: user wants to add new or used tires to an existing brand (e.g. "add 5 new to michelin", "put 3 used goodyear tires in")
-- set_threshold: user wants to change the low-stock alert threshold (e.g. "set threshold to 10", "change tire threshold to 150")
-- delete_tire: user wants to remove a tire brand (e.g. "delete michelin", "remove bridgestone")
-- create_category: user wants to create a new inventory chart/table for a category (e.g. "create a table for brakes", "add a new chart called wipers", "make a spark plugs category")
+- create_tire: user wants to register a new item in a category (e.g. "add michelin to tires", "create oil 5W40")
+- add_quantity: user wants to add new or used stock to an existing item (e.g. "add 5 new michelin tires", "put 3 used 5W40 oils in")
+- set_threshold: user wants to change the low-stock alert threshold for a category (e.g. "set tires threshold to 50", "change oils threshold to 10")
+- delete_tire: user wants to remove an item from a category (e.g. "delete michelin from tires", "remove 5W40 oil")
+- create_category: user wants to create a new inventory chart/table (e.g. "create a table for brakes", "add a new chart called wipers")
 - unknown: intent cannot be determined
 
+Always infer the category from context (e.g. "tires" for tire brands, "oils" for oil grades, "oilfilters" for oil filters, etc.).
 For add_quantity, if the user does not specify new or used, default to new=quantity, used=0."""
 
 

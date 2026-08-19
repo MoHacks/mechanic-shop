@@ -14,22 +14,24 @@ async def handle_command(db: Session, text: str) -> str:
 
     try:
         if action == "create_tire":
-            item = await items_service.create_tire(db, name=parsed["name"])
-            return f"✅ Created tire '{item.name}'."
+            category = parsed.get("category", "tires")
+            item = await items_service.create_tire(db, name=parsed["name"], category=category)
+            return f"✅ Created '{item.name}' in '{category}'."
 
         elif action == "add_quantity":
-            item = await items_service.add_item_quantity(db, name=parsed["name"], new=parsed["new"], used=parsed["used"])
-            return f"✅ Added {parsed['new']} new/{parsed['used']} used to '{item.name}'.\n New total: {item.new}. Used total: {item.used}."
+            category = parsed.get("category", "tires")
+            item = await items_service.add_item_quantity(db, name=parsed["name"], category=category, new=parsed["new"], used=parsed["used"])
+            return f"✅ Added {parsed['new']} new/{parsed['used']} used to '{item.name}' in '{category}'.\nNew total: {item.new}. Used total: {item.used}."
 
         elif action == "set_threshold":
-            threshold_update = ThresholdUpdate(value=parsed["value"])
             category = parsed.get("category", "tires")
-            threshold = await threshold_service.set_threshold(db, category, threshold_update)
+            threshold = await threshold_service.set_threshold(db, category, ThresholdUpdate(value=parsed["value"]))
             return f"✅ Threshold for '{category}' set to {threshold.value}."
 
         elif action == "delete_tire":
-            await items_service.delete_tire(db, name=parsed["name"])
-            return f"✅ Deleted tire '{parsed['name']}'."
+            category = parsed.get("category", "tires")
+            await items_service.delete_tire(db, name=parsed["name"], category=category)
+            return f"✅ Deleted '{parsed['name']}' from '{category}'."
 
         elif action == "create_category":
             cat_name = parsed.get("category_name", "").strip().lower()
