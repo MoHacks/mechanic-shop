@@ -1,4 +1,4 @@
-# server/services/command_dispatcher.py
+import difflib
 import random
 from datetime import datetime
 from sqlalchemy.orm import Session
@@ -8,40 +8,68 @@ from schemas import ThresholdUpdate
 from models import Category, Log, Item, Threshold
 from websocket_manager import manager
 
+
+def _resolve_category(db: Session, raw: str) -> str:
+    """Normalise a raw category string and fuzzy-match it against DB categories.
+
+    Handles transcription quirks such as:
+      - spaces in compound words  ("light bulbs" → "lightbulbs")
+      - singular forms            ("lightbulb"   → "lightbulbs")
+      - close mis-spellings       ("brakline"    → "brakelines")
+    """
+    normalised = raw.strip().lower().replace(" ", "")
+    db_names = [c.name for c in db.query(Category).all()]
+
+    if normalised in db_names:
+        return normalised
+
+    # prefix match: "lightbulb" starts "lightbulbs", or vice-versa
+    for name in db_names:
+        if name.startswith(normalised) or normalised.startswith(name):
+            return name
+
+    # fuzzy fallback
+    close = difflib.get_close_matches(normalised, db_names, n=1, cutoff=0.7)
+    if close:
+        return close[0]
+
+    return normalised  # unchanged; natural "not found" error will surface
+
+
 async def handle_command(db: Session, text: str) -> str:
     parsed = parse_command(text)
     action = parsed["action"]
 
     try:
         if action == "create_tire":
-            category = parsed.get("category", "tires")
+            category = _resolve_category(db, _resolve_category(db, parsed.get("category", "tires")))
             item = await items_service.create_tire(db, name=parsed["name"], category=category)
             return f"✅ Created '{item.name}' in '{category}'."
 
         elif action == "add_quantity":
-            category = parsed.get("category", "tires")
+            category = _resolve_category(db, parsed.get("category", "tires"))
             item = await items_service.add_item_quantity(db, name=parsed["name"], category=category, new=parsed["new"], used=parsed["used"])
             return f"✅ Added {parsed['new']} new/{parsed['used']} used to '{item.name}' in '{category}'.\nNew total: {item.new}. Used total: {item.used}."
 
         elif action == "set_threshold":
-            category = parsed.get("category", "tires")
+            category = _resolve_category(db, parsed.get("category", "tires"))
             threshold = await threshold_service.set_threshold(db, category, ThresholdUpdate(value=parsed["value"]))
             return f"✅ Threshold for '{category}' set to {threshold.value}."
 
         elif action == "delete_tire":
-            category = parsed.get("category", "tires")
+            category = _resolve_category(db, parsed.get("category", "tires"))
             await items_service.delete_tire(db, name=parsed["name"], category=category)
             return f"✅ Deleted '{parsed['name']}' from '{category}'."
 
         elif action == "get_threshold":
-            category = parsed.get("category", "tires")
+            category = _resolve_category(db, parsed.get("category", "tires"))
             threshold = db.query(Threshold).filter(Threshold.category == category).first()
             if not threshold:
                 return f"ℹ️ No threshold set for '{category}' yet."
             return f"ℹ️ Threshold for '{category}': {threshold.value}"
 
         elif action == "list_above_threshold":
-            category = parsed.get("category", "tires")
+            category = _resolve_category(db, parsed.get("category", "tires"))
             threshold = db.query(Threshold).filter(Threshold.category == category).first()
             if not threshold:
                 return f"⚠️ No threshold set for '{category}' yet."
@@ -53,7 +81,7 @@ async def handle_command(db: Session, text: str) -> str:
             return f"📈 Items in '{category}' above threshold ({threshold.value}):\n{lines}"
 
         elif action == "list_below_threshold":
-            category = parsed.get("category", "tires")
+            category = _resolve_category(db, parsed.get("category", "tires"))
             threshold = db.query(Threshold).filter(Threshold.category == category).first()
             if not threshold:
                 return f"⚠️ No threshold set for '{category}' yet."
