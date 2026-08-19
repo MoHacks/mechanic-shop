@@ -74,10 +74,10 @@ async def handle_command(db: Session, text: str) -> str:
             if not threshold:
                 return f"⚠️ No threshold set for '{category}' yet."
             items = db.query(Item).filter(Item.category == category).all()
-            above = [i for i in items if (i.new + i.used) > threshold.value]
+            above = [i for i in items if i.new > threshold.value or i.used > threshold.value]
             if not above:
                 return f"ℹ️ No items in '{category}' are above the threshold ({threshold.value})."
-            lines = "\n".join(f"• {i.name}: {i.new} new, {i.used} used (total {i.new + i.used})" for i in above)
+            lines = "\n".join(f"• {i.name}: {i.new} new, {i.used} used" for i in above)
             return f"📈 Items in '{category}' above threshold ({threshold.value}):\n{lines}"
 
         elif action == "list_below_threshold":
@@ -86,10 +86,10 @@ async def handle_command(db: Session, text: str) -> str:
             if not threshold:
                 return f"⚠️ No threshold set for '{category}' yet."
             items = db.query(Item).filter(Item.category == category).all()
-            below = [i for i in items if (i.new + i.used) < threshold.value]
+            below = [i for i in items if i.new < threshold.value or i.used < threshold.value]
             if not below:
                 return f"ℹ️ No items in '{category}' are below the threshold ({threshold.value})."
-            lines = "\n".join(f"• {i.name}: {i.new} new, {i.used} used (total {i.new + i.used})" for i in below)
+            lines = "\n".join(f"• {i.name}: {i.new} new, {i.used} used" for i in below)
             return f"📉 Items in '{category}' below threshold ({threshold.value}):\n{lines}"
 
         elif action == "create_category":
