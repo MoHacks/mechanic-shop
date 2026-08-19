@@ -6,6 +6,7 @@ from websocket_manager import manager
 
 
 async def create_tire(db: Session, name: str, category: str = "tires", new: int = 0, used: int = 0):
+    name = name.strip().lower()
     existing = db.query(Item).filter(Item.name == name, Item.category == category).first()
     if existing:
         raise ValueError(f"'{name}' already exists in '{category}'.")

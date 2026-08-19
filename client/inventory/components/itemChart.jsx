@@ -155,7 +155,7 @@ export default function ItemChart({ category, colorStart = "rgb(255,0,0)", color
     const res = await createItem(
       {
         category: category,
-        name: newTireName.trim().toUpperCase(),
+        name: newTireName.trim().toLowerCase(),
         mode: "dual", //TODO: Change this eventually to be dynamic
         new: Number(newAmount),
         used: Number(usedAmount)
