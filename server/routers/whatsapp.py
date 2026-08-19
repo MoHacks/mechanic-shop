@@ -14,6 +14,7 @@ import requests as http_requests
 router = APIRouter(prefix="/whatsapp", tags=["WhatsApp"])
 twilio_client = Client(settings.TWILIO_SID, settings.TWILIO_AUTH_TOKEN)
 
+print("in whatsapp.py")
 # Normalise a raw Author value to E.164 (strip any "whatsapp:" prefix)
 def _e164(number: str) -> str:
     return number.replace("whatsapp:", "").strip()
@@ -23,6 +24,7 @@ _ALLOWED: set[str] = {
     _e164(n) for n in settings.ALLOWED_NUMBERS.split(",") if n.strip()
 }
 
+print("after _ALLOWED")
 _COMMAND_HINT = """
 ─────────────────────────
 💬 *Example commands:*
@@ -43,7 +45,8 @@ whisper_model = WhisperModel("medium", device="cpu", compute_type="int8")
 
 
 def transcribe_voice_note(media_url: str) -> str:
-    response = http_requests.get(media_url, auth=(TWILIO_SID, TWILIO_AUTH_TOKEN))
+    print("transcribe_voice_note()")
+    response = http_requests.get(media_url, auth=(settings.TWILIO_SID, settings.TWILIO_AUTH_TOKEN))
     response.raise_for_status()
 
     with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tmp:
@@ -59,6 +62,7 @@ def transcribe_voice_note(media_url: str) -> str:
 
 async def process_whatsapp_message(body: str, from_number: str, media_url: str = None, media_content_type: str = None):
     db = SessionLocal()
+    print("in process_whatsapp_message()")
     try:
         if media_url and media_content_type and media_content_type.startswith("audio/"):
             body = transcribe_voice_note(media_url)
@@ -82,13 +86,20 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks, 
     print("GOT MESSAGE:", dict(form))
 
     body = form.get("Body", "")
-    from_number = form.get("Author")
+    # Conversations API uses "Author"; standard WhatsApp webhook uses "From"
+    from_number = form.get("Author") or form.get("From")
     chat_service_sid = form.get("ChatServiceSid")
 
     media_url = None
     media_content_type = None
     media_json = form.get("Media")
+    print("media_url: ", media_url)
+    print("media_content_type: ", media_content_type)
+    print("body: ", body)
+    print("Author: ", from_number)
+
     if media_json:
+        # Conversations API format: Media is a JSON array
         media_list = json.loads(media_json)
         if media_list:
             first_media = media_list[0]
@@ -96,14 +107,16 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks, 
             if media_content_type.startswith("audio/"):
                 media_sid = first_media.get("Sid")
                 media_url = f"https://mcs.us1.twilio.com/v1/Services/{chat_service_sid}/Media/{media_sid}/Content"
+    elif form.get("NumMedia", "0") != "0":
+        # Standard WhatsApp webhook format: NumMedia + MediaUrl0 + MediaContentType0
+        media_content_type = form.get("MediaContentType0", "")
+        if media_content_type.startswith("audio/"):
+            media_url = form.get("MediaUrl0")
 
-    print("media_url: ", media_url)
-    print("media_content_type: ", media_content_type)
-    print("body: ", body)
-    print("Author: ", from_number)
 
     # Allowlist check — reject unauthorised senders
     if _ALLOWED and _e164(from_number or "") not in _ALLOWED:
+        print("ALLOWED or not ALLOWED")
         to = from_number if from_number.startswith("whatsapp:") else f"whatsapp:{from_number}"
         twilio_client.messages.create(
             from_="whatsapp:+14155238886",
