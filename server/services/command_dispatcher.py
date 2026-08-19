@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from services.command_parser import parse_command
 from services import items_service, threshold_service
 from schemas import ThresholdUpdate
-from models import Category, Log
+from models import Category, Log, Item, Threshold
 from websocket_manager import manager
 
 async def handle_command(db: Session, text: str) -> str:
@@ -32,6 +32,37 @@ async def handle_command(db: Session, text: str) -> str:
             category = parsed.get("category", "tires")
             await items_service.delete_tire(db, name=parsed["name"], category=category)
             return f"✅ Deleted '{parsed['name']}' from '{category}'."
+
+        elif action == "get_threshold":
+            category = parsed.get("category", "tires")
+            threshold = db.query(Threshold).filter(Threshold.category == category).first()
+            if not threshold:
+                return f"ℹ️ No threshold set for '{category}' yet."
+            return f"ℹ️ Threshold for '{category}': {threshold.value}"
+
+        elif action == "list_above_threshold":
+            category = parsed.get("category", "tires")
+            threshold = db.query(Threshold).filter(Threshold.category == category).first()
+            if not threshold:
+                return f"⚠️ No threshold set for '{category}' yet."
+            items = db.query(Item).filter(Item.category == category).all()
+            above = [i for i in items if (i.new + i.used) > threshold.value]
+            if not above:
+                return f"ℹ️ No items in '{category}' are above the threshold ({threshold.value})."
+            lines = "\n".join(f"• {i.name}: {i.new} new, {i.used} used (total {i.new + i.used})" for i in above)
+            return f"📈 Items in '{category}' above threshold ({threshold.value}):\n{lines}"
+
+        elif action == "list_below_threshold":
+            category = parsed.get("category", "tires")
+            threshold = db.query(Threshold).filter(Threshold.category == category).first()
+            if not threshold:
+                return f"⚠️ No threshold set for '{category}' yet."
+            items = db.query(Item).filter(Item.category == category).all()
+            below = [i for i in items if (i.new + i.used) < threshold.value]
+            if not below:
+                return f"ℹ️ No items in '{category}' are below the threshold ({threshold.value})."
+            lines = "\n".join(f"• {i.name}: {i.new} new, {i.used} used (total {i.new + i.used})" for i in below)
+            return f"📉 Items in '{category}' below threshold ({threshold.value}):\n{lines}"
 
         elif action == "create_category":
             cat_name = parsed.get("category_name", "").strip().lower()

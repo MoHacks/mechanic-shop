@@ -21,11 +21,15 @@ twilio_client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
 _COMMAND_HINT = """
 ─────────────────────────
 💬 *Example commands:*
-• "Create a table for brakes"
-• "Add michelin to tires"
-• "Add 5 new and 2 used to michelin"
-• "Set tires threshold to 50"
-• "Delete michelin"
+• "Create a table for brakes chart"
+• "Create new brakes called random"
+• "Add michelin to tires chart"
+• "Add 5 new and 2 used to michelin in tires chart"
+• "Set tires chart threshold to 50"
+• "What is the threshold for the tires chart"
+• "List all items above the threshold in the tires chart"
+• "List all items below the threshold in the rims chart"
+• "Delete michelin from tires chart"
 
 ⚠️ To delete a chart, please use the browser.
 ─────────────────────────"""

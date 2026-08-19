@@ -14,7 +14,7 @@ _tools = [{
         "properties": {
             "action": {
                 "type": "string",
-                "enum": ["create_tire", "add_quantity", "set_threshold", "delete_tire", "create_category", "unknown"],
+                "enum": ["create_tire", "add_quantity", "set_threshold", "get_threshold", "delete_tire", "create_category", "list_above_threshold", "list_below_threshold", "unknown"],
                 "description": "The type of action the user wants to perform."
             },
             "name": {
@@ -59,6 +59,9 @@ Actions:
 - set_threshold: user wants to change the low-stock alert threshold for a category (e.g. "set tires threshold to 50", "change oils threshold to 10")
 - delete_tire: user wants to remove an item from a category (e.g. "delete michelin from tires", "remove 5W40 oil")
 - create_category: user wants to create a new inventory chart/table (e.g. "create a table for brakes", "add a new chart called wipers")
+- get_threshold: user wants to know the current threshold for a category (e.g. "what is the threshold for brakelines", "threshold for oils")
+- list_above_threshold: user wants to list items whose total stock exceeds the threshold (e.g. "list all items above the threshold in tires", "what tires are above the threshold")
+- list_below_threshold: user wants to list items whose total stock is below the threshold (e.g. "list all items below the threshold in oils", "what oils need restocking")
 - unknown: intent cannot be determined
 
 Always infer the category from context (e.g. "tires" for tire brands, "oils" for oil grades, "oilfilters" for oil filters, etc.).
