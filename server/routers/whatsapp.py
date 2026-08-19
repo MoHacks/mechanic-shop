@@ -6,17 +6,22 @@ from db import get_db, SessionLocal
 from services.command_dispatcher import handle_command
 from twilio.rest import Client
 from faster_whisper import WhisperModel
+from config import settings
 import os
 import tempfile
 import requests as http_requests
-from dotenv import load_dotenv
-
-load_dotenv()
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_SID = os.getenv("TWILIO_SID")
 
 router = APIRouter(prefix="/whatsapp", tags=["WhatsApp"])
-twilio_client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
+twilio_client = Client(settings.TWILIO_SID, settings.TWILIO_AUTH_TOKEN)
+
+# Normalise a raw Author value to E.164 (strip any "whatsapp:" prefix)
+def _e164(number: str) -> str:
+    return number.replace("whatsapp:", "").strip()
+
+# Build the authorised-number set from the env var (empty = allow all)
+_ALLOWED: set[str] = {
+    _e164(n) for n in settings.ALLOWED_NUMBERS.split(",") if n.strip()
+}
 
 _COMMAND_HINT = """
 ─────────────────────────
@@ -28,7 +33,7 @@ _COMMAND_HINT = """
 • "Set tires chart threshold to 50"
 • "What is the threshold for the tires chart"
 • "List all items above the threshold in the tires chart"
-• "List all items below the threshold in the rims chart"
+• "List all brakelines below the threshold"
 • "Delete michelin from tires chart"
 
 ⚠️ To delete a chart, please use the browser.
@@ -62,9 +67,11 @@ async def process_whatsapp_message(body: str, from_number: str, media_url: str =
     finally:
         db.close()
 
+    # Ensure the recipient always has the whatsapp: prefix
+    to = from_number if from_number.startswith("whatsapp:") else f"whatsapp:{from_number}"
     twilio_client.messages.create(
         from_="whatsapp:+14155238886",
-        to=from_number,
+        to=to,
         body=reply_text
     )
 
@@ -94,6 +101,17 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks, 
     print("media_content_type: ", media_content_type)
     print("body: ", body)
     print("Author: ", from_number)
+
+    # Allowlist check — reject unauthorised senders
+    if _ALLOWED and _e164(from_number or "") not in _ALLOWED:
+        to = from_number if from_number.startswith("whatsapp:") else f"whatsapp:{from_number}"
+        twilio_client.messages.create(
+            from_="whatsapp:+14155238886",
+            to=to,
+            body="⛔ You are not authorised to use this system."
+        )
+        return Response(content="<Response></Response>", media_type="application/xml")
+
     background_tasks.add_task(process_whatsapp_message, body, from_number, media_url, media_content_type)
 
     return Response(content="<Response></Response>", media_type="application/xml")
