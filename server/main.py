@@ -15,6 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+print("in main.py")
 # Include routers
 app.include_router(tires.router)
 app.include_router(logs.router)
