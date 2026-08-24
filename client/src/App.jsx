@@ -20,7 +20,9 @@ function App() {
   useEffect(() => {
     getCategories().then(setCategories);
 
-    const ws = new WebSocket("ws://localhost:8000/ws");
+    const wsBase = import.meta.env.VITE_WS_URL
+      || `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}`;
+    const ws = new WebSocket(`${wsBase}/ws`);
     ws.onmessage = (event) => {
       if (event.data === "category_created") {
         getCategories().then(setCategories);

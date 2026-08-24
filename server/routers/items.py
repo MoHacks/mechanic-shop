@@ -45,7 +45,7 @@ async def create_tire(item: ItemCreate, db: Session = Depends(get_db)):
     # if category !== "tires":
     #     item.used = 0
     
-    new_item = Item(category=item.category, name=item.name, mode="dual", new=item.new, used=item.used) # TODO: mode will always be dual for now....change it later
+    new_item = Item(category=item.category, name=item.name.strip().lower(), mode="dual", new=item.new, used=item.used) # TODO: mode will always be dual for now....change it later
     
     db.add(new_item)
 

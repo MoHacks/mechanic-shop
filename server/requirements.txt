@@ -1,3 +1,4 @@
+anthropic
 alembic==1.17.2
 annotated-types==0.7.0
 anyio==4.11.0
@@ -5,6 +6,7 @@ click==8.3.0
 DateTime==5.5
 dotenv==0.9.9
 fastapi==0.119.1
+faster-whisper==1.2.1
 gunicorn==23.0.0
 h11==0.16.0
 httptools==0.7.1
