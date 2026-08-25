@@ -72,7 +72,9 @@ export default function ItemChart({ category, colorStart = "rgb(255,0,0)", color
     fetchThreshold();
 
     // Setup WebSocket connection
-    const ws = new WebSocket("ws://localhost:8000/ws");
+    const wsBase = import.meta.env.VITE_WS_URL
+      || `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}`;
+    const ws = new WebSocket(`${wsBase}/ws`);
 
     ws.onopen = () => console.log("✅ WebSocket connected");
 
@@ -170,7 +172,7 @@ export default function ItemChart({ category, colorStart = "rgb(255,0,0)", color
 
   const downloadLogs = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/logs/");
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || ""}/logs/`);
       const logs = res.data;
   
       if (!logs.length) {
