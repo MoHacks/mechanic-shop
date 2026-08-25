@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import carlbadautoLogo from '/logo-carl.png'
 import './App.css'
-import ItemChart from '../inventory/components/ItemChart'
+import ItemChart from '../inventory/components/itemChart'
 import { getCategories, createCategory, deleteCategory } from '../inventory/api/categoriesApi'
 
 const randomRgb = () => {
