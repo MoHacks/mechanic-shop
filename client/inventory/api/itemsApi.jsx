@@ -10,12 +10,12 @@ export const getItems = async (category) => {
 }
 
 export const getItemThreshold = async (category) => {
-    const response = await axios.get(`${BASE_URL}/threshold`, { params: { category } });
+    const response = await axios.get(`${BASE_URL}/threshold/`, { params: { category } });
     return response.data;
 }
 
 export const changeItemThreshold = async (category, value) => {
-    const response = await axios.put(`${BASE_URL}/threshold`, { value }, { params: { category } });
+    const response = await axios.put(`${BASE_URL}/threshold/`, { value }, { params: { category } });
     return response.data;
 }
 
