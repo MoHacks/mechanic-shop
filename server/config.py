@@ -4,6 +4,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     TWILIO_AUTH_TOKEN: str
     TWILIO_SID: str
+    TWILIO_WHATSAPP_NUMBER: str = "whatsapp:+14155238886"  # sandbox default; override in production
     ANTHROPIC_KEY: str
     ALLOWED_NUMBERS: str = ""  # comma-separated E.164 numbers e.g. +15551234567,+447911123456
 

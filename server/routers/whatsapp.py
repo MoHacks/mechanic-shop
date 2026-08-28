@@ -74,7 +74,7 @@ async def process_whatsapp_message(body: str, from_number: str, media_url: str =
     # Ensure the recipient always has the whatsapp: prefix
     to = from_number if from_number.startswith("whatsapp:") else f"whatsapp:{from_number}"
     twilio_client.messages.create(
-        from_="whatsapp:+14155238886",
+        from_=settings.TWILIO_WHATSAPP_NUMBER,
         to=to,
         body=reply_text
     )
@@ -119,7 +119,7 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks, 
         print("ALLOWED or not ALLOWED")
         to = from_number if from_number.startswith("whatsapp:") else f"whatsapp:{from_number}"
         twilio_client.messages.create(
-            from_="whatsapp:+14155238886",
+            from_=settings.TWILIO_WHATSAPP_NUMBER,
             to=to,
             body="⛔ You are not authorised to use this system."
         )
