@@ -243,8 +243,7 @@ export default function ItemChart({ category, colorStart = "rgb(255,0,0)", color
       
       <div>
        {/* Download Logs Button */}
-       {category === "tires" && (
-        <button
+       <button
           onClick={() => downloadLogs()}
             style={{
               background: "black",
@@ -257,7 +256,7 @@ export default function ItemChart({ category, colorStart = "rgb(255,0,0)", color
             }}
           >
             Download Previous 1000 Logs
-        </button>)}
+        </button>
 
 
         <label style={{ display: "flex", justifySelf: "center", alignSelf: "center" }}>

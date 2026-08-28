@@ -27,10 +27,11 @@ def upgrade() -> None:
         'items',
         sa.Column('id', sa.Integer(), primary_key=True, index=True),
         sa.Column('category', sa.String(), index=True, nullable=False),
-        sa.Column('name', sa.String(), unique=True, nullable=False),
+        sa.Column('name', sa.String(), nullable=False),
         sa.Column('mode', sa.String(), nullable=True),
         sa.Column('new', sa.Integer(), nullable=True),
         sa.Column('used', sa.Integer(), nullable=True),
+        sa.UniqueConstraint('name', 'category', name='uq_item_name_category'),
     )
 
     op.create_table(
