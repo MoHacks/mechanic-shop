@@ -123,6 +123,14 @@ async def whatsapp_webhook(request: Request, background_tasks: BackgroundTasks, 
         )
         return Response(content="<Response></Response>", media_type="application/xml")
 
+    if not from_number:
+        print("⚠️  No sender number found — ignoring request")
+        return Response(content="<Response></Response>", media_type="application/xml")
+
+    if not body and not media_url:
+        print("⚠️  Empty body and no media — ignoring request")
+        return Response(content="<Response></Response>", media_type="application/xml")
+
     background_tasks.add_task(process_whatsapp_message, body, from_number, media_url, media_content_type)
     print("   Queued for processing")
 
