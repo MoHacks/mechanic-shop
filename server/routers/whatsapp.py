@@ -72,12 +72,16 @@ async def process_whatsapp_message(body: str, from_number: str, media_url: str =
         db.close()
 
     to = from_number if from_number.startswith("whatsapp:") else f"whatsapp:{from_number}"
-    twilio_client.messages.create(
-        from_=settings.TWILIO_WHATSAPP_NUMBER,
-        to=to,
-        body=reply_text
-    )
-    print(f"📤 Reply sent to {to}")
+    print(f"📤 Sending reply from {settings.TWILIO_WHATSAPP_NUMBER} to {to}")
+    try:
+        twilio_client.messages.create(
+            from_=settings.TWILIO_WHATSAPP_NUMBER,
+            to=to,
+            body=reply_text
+        )
+        print(f"📤 Reply sent to {to}")
+    except Exception as e:
+        print(f"❌ Failed to send reply to {to}: {e}")
 
 
 @router.post("/webhook")
