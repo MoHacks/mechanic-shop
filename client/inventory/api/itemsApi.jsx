@@ -35,7 +35,7 @@ export const deleteItem = async (payload) => {
     try {
         //its the same as doing `${BASE_URL}?name=${name}&category={category}`
         console.log("payload:", payload)
-        const response = await axios.delete(`${BASE_URL}`, payload);   
+        const response = await axios.delete(`${BASE_URL}/`, payload);
         return response;
     }  
     catch (err) {
