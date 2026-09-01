@@ -136,7 +136,7 @@ export default function ItemChart({ category, colorStart = "rgb(255,0,0)", color
     if (!selectedItem) return;
 
     // axios treats 'params' as special, it appends each key : value pair in the query path parameter
-    deleteItem({
+    await deleteItem({
       params: {
         name : selectedItem,
         category: category
