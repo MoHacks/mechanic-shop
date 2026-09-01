@@ -1,4 +1,6 @@
 import json
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Request, BackgroundTasks, Depends
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
@@ -10,6 +12,8 @@ from config import settings
 import os
 import tempfile
 import requests as http_requests
+
+_transcription_executor = ThreadPoolExecutor(max_workers=1)
 
 router = APIRouter(prefix="/whatsapp", tags=["WhatsApp"])
 twilio_client = Client(settings.TWILIO_SID, settings.TWILIO_AUTH_TOKEN)
@@ -65,7 +69,8 @@ async def process_whatsapp_message(body: str, from_number: str, media_url: str =
     print(f"📩 Processing message from {from_number}: '{body}'")
     try:
         if media_url and media_content_type and media_content_type.startswith("audio/"):
-            body = transcribe_voice_note(media_url)
+            loop = asyncio.get_event_loop()
+            body = await loop.run_in_executor(_transcription_executor, transcribe_voice_note, media_url)
         reply_text = await handle_command(db, body) + _COMMAND_HINT
         print(f"✅ Reply: {reply_text[:80]}...")
     finally:

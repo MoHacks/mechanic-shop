@@ -15,4 +15,4 @@ RUN mkdir -p /app/data
 EXPOSE 8000
 
 # Run migrations then start the server
-CMD ["sh", "-c", "alembic upgrade head && gunicorn main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"]
+CMD ["sh", "-c", "alembic upgrade head && gunicorn main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 120"]
