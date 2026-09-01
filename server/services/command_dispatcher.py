@@ -42,12 +42,14 @@ async def handle_command(db: Session, text: str) -> str:
     try:
         if action == "create_tire":
             category = _resolve_category(db, _resolve_category(db, parsed.get("category", "tires")))
-            item = await items_service.create_tire(db, name=parsed["name"], category=category)
+            name = parsed["name"].strip().lower()
+            item = await items_service.create_tire(db, name=name, category=category)
             return f"✅ Created '{item.name}' in '{category}'."
 
         elif action == "add_quantity":
             category = _resolve_category(db, parsed.get("category", "tires"))
-            item = await items_service.add_item_quantity(db, name=parsed["name"], category=category, new=parsed["new"], used=parsed["used"])
+            name = parsed["name"].strip().lower()
+            item = await items_service.add_item_quantity(db, name=name, category=category, new=parsed["new"], used=parsed["used"])
             return f"✅ Added {parsed['new']} new/{parsed['used']} used to '{item.name}' in '{category}'.\nNew total: {item.new}. Used total: {item.used}."
 
         elif action == "set_threshold":
@@ -57,8 +59,9 @@ async def handle_command(db: Session, text: str) -> str:
 
         elif action == "delete_tire":
             category = _resolve_category(db, parsed.get("category", "tires"))
-            await items_service.delete_tire(db, name=parsed["name"], category=category)
-            return f"✅ Deleted '{parsed['name']}' from '{category}'."
+            name = parsed["name"].strip().lower()
+            await items_service.delete_tire(db, name=name, category=category)
+            return f"✅ Deleted '{name}' from '{category}'."
 
         elif action == "get_threshold":
             category = _resolve_category(db, parsed.get("category", "tires"))
