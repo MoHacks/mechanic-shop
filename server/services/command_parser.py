@@ -14,7 +14,7 @@ _tools = [{
         "properties": {
             "action": {
                 "type": "string",
-                "enum": ["create_tire", "add_quantity", "set_threshold", "get_threshold", "delete_tire", "create_category", "list_above_threshold", "list_below_threshold", "unknown"],
+                "enum": ["create_tire", "add_quantity", "remove_quantity", "set_threshold", "get_threshold", "delete_tire", "create_category", "list_above_threshold", "list_below_threshold", "unknown"],
                 "description": "The type of action the user wants to perform."
             },
             "name": {
@@ -57,7 +57,8 @@ Actions:
 - create_tire: user wants to register a new item in a category (e.g. "add michelin to tires", "create oil 5W40")
 - add_quantity: user wants to add new or used stock to an existing item (e.g. "add 5 new michelin tires", "put 3 used 5W40 oils in")
 - set_threshold: user wants to change the low-stock alert threshold for a category (e.g. "set tires threshold to 50", "change oils threshold to 10")
-- delete_tire: user wants to remove an item from a category (e.g. "delete michelin from tires", "remove 5W40 oil")
+- remove_quantity: user wants to subtract stock from an existing item (e.g. "remove 5 new michelin from tires", "take out 3 used 5W40 oils")
+- delete_tire: user wants to permanently delete an item from a category (e.g. "delete michelin from tires", "delete 5W40 oil")
 - create_category: user wants to create a new inventory chart/table (e.g. "create a table for brakes", "add a new chart called wipers")
 - get_threshold: user wants to know the current threshold for a category (e.g. "what is the threshold for brakelines", "threshold for oils")
 - list_above_threshold: user wants to list items whose total stock exceeds the threshold (e.g. "list all items above the threshold in tires", "what tires are above the threshold")

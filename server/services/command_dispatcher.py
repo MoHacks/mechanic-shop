@@ -53,6 +53,12 @@ async def handle_command(db: Session, text: str) -> str:
             item = await items_service.add_item_quantity(db, name=name, category=category, new=parsed["new"], used=parsed["used"])
             return f"✅ Added {parsed['new']} new/{parsed['used']} used to '{item.name}' in '{category}'.\nNew total: {item.new}. Used total: {item.used}."
 
+        elif action == "remove_quantity":
+            category = _resolve_category(db, parsed.get("category", "tires"))
+            name = parsed["name"].strip().lower()
+            item = await items_service.remove_item_quantity(db, name=name, category=category, new=parsed.get("new", 0), used=parsed.get("used", 0))
+            return f"✅ Removed {parsed.get('new', 0)} new/{parsed.get('used', 0)} used from '{item.name}' in '{category}'.\nNew total: {item.new}. Used total: {item.used}."
+
         elif action == "set_threshold":
             category = _resolve_category(db, parsed.get("category", "tires"))
             threshold = await threshold_service.set_threshold(db, category, ThresholdUpdate(value=parsed["value"]))
