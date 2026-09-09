@@ -34,6 +34,22 @@ async def add_item_quantity(db: Session, name: str, category: str = "tires", new
 
     return item
 
+async def remove_item_quantity(db: Session, name: str, category: str = "tires", new: int = 0, used: int = 0):
+    item = db.query(Item).filter(Item.name == name, Item.category == category).first()
+    if not item:
+        raise ValueError(f"'{name}' not found in '{category}'.")
+    if item.new - new < 0 or item.used - used < 0:
+        raise ValueError(f"Cannot remove more than current stock (new: {item.new}, used: {item.used}).")
+    item.new -= new
+    item.used -= used
+    db.add(Log(action=f"removed {new} new/{used} used from '{name}' in '{category}'", created_at=datetime.utcnow()))
+    db.commit()
+    db.refresh(item)
+
+    await manager.broadcast("tire_removed")
+
+    return item
+
 async def delete_tire(db: Session, name: str, category: str = "tires"):
     item = db.query(Item).filter(Item.name == name, Item.category == category).first()
     if not item:
