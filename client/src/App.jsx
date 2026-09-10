@@ -13,6 +13,7 @@ const randomRgb = () => {
 
 function App() {
   const [categories, setCategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [previewColors, setPreviewColors] = useState({ start: randomRgb(), end: randomRgb() });
@@ -63,25 +64,40 @@ function App() {
         <h1 style={{ marginTop: 0, fontFamily: "Times New Roman", color: "orange" }}>
           Inventory Management System
         </h1>
-        <button
-          onClick={() => setShowAddModal(true)}
-          style={{
-            background: "orange",
-            color: "black",
-            border: "none",
-            padding: "10px 24px",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            marginBottom: "2rem",
-          }}
-        >
-          + Add Chart
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "2rem" }}>
+          <input
+            placeholder="Search charts..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value.toLowerCase())}
+            style={{
+              padding: "10px 16px",
+              borderRadius: "6px",
+              border: "1px solid #555",
+              background: "#1a1a1a",
+              color: "white",
+              fontSize: "14px",
+              width: "220px",
+            }}
+          />
+          <button
+            onClick={() => setShowAddModal(true)}
+            style={{
+              background: "orange",
+              color: "black",
+              border: "none",
+              padding: "10px 24px",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            + Add Chart
+          </button>
+        </div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "7rem" }}>
-        {categories.map(cat => (
+        {categories.filter(cat => cat.name.startsWith(searchQuery)).map(cat => (
           <ItemChart
             key={cat.name}
             category={cat.name}
@@ -90,6 +106,9 @@ function App() {
             onDelete={() => handleDeleteCategory(cat.name)}
           />
         ))}
+        {searchQuery && categories.filter(cat => cat.name.startsWith(searchQuery)).length === 0 && (
+          <p style={{ color: "#888", textAlign: "center" }}>No charts match "{searchQuery}"</p>
+        )}
       </div>
 
       {showAddModal && (
